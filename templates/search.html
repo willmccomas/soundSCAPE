@@ -1,42 +1,120 @@
 <html>
-    <head>
-        <title>Search for an Album</title>
 
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<head>
+    <title>Search for an Album</title>
 
-        <style>
-            body {
-                text-align: center;
-            }
-        </style>
-    </head>
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
 
-    <body>
-        <nav>
-            <a href="/" class="logo">
-                <span class="sound">sound</span><span class="scape">SCAPE</span>
-            </a>
 
-            <div class="nav-links">
-                <a href="/all_rankings">Ratings</a>
-                <a href="/search">Search</a>
-            </div>
-        </nav>
+<body>
 
-        <div class="page-container">
+    <!-- Navigation bar -->
+    <nav>
 
-            <h1>Search for an Album</h1>
+        <!-- SoundScape logo -->
+        <a href="/" class="logo">
+            <span class="sound">sound</span><span class="scape">SCAPE</span>
+        </a>
 
-            <form action="/search" method="GET">
-                <input
-                    type="text"
-                    name="query"
-                    placeholder="Search for an album..."
-                >
-                <button type="submit">Search</button>
-            </form> 
-        
+        <!-- Main navigation links -->
+        <div class="nav-links">
+            <a href="/all_rankings">Ratings</a>
+            <a href="/search">Search</a>
         </div>
-        
-    </body>
+
+    </nav>
+
+
+    <!-- Main search page -->
+    <div class="page-container">
+
+        <h1 class="search-title">Search for an Album</h1>
+
+
+        <!-- Search bar -->
+        <form action="/search" method="GET" class="album-search-form">
+
+            <input
+                type="text"
+                name="query"
+                value="{{ query }}"
+                placeholder="Search for an album..."
+                autocomplete="off"
+            >
+
+            <button type="submit">
+                Search
+            </button>
+
+        </form>
+
+
+        <!-- Search results -->
+        {% if query %}
+
+            <h2 class="search-results-heading">
+                Results for "{{ query }}"
+            </h2>
+
+
+            {% if albums %}
+
+                {% for album in albums %}
+
+                    <!-- Individual album search result -->
+                    <div
+                        class="album-search-card"
+                        style="background-image: url('{{ album.art }}');"
+                    >
+
+                        <!-- Album artwork -->
+                        <img
+                            src="{{ album.art }}"
+                            width="200"
+                        >
+
+
+                        <!-- Album information -->
+                        <div class="search-album-info">
+
+                            <h2>{{ album.name }}</h2>
+
+                            <p>{{ album.artist }}</p>
+
+                            <p>
+                                Release Date: {{ album.release_date }}
+                            </p>
+
+
+                            <!-- Go to the album's ranking page -->
+                            <a href="/album/{{ album.id }}">
+                                <button type="button">
+                                    Rate this album
+                                </button>
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <!-- No results message -->
+                <p class="no-search-results">
+                    No albums found. Try another search.
+                </p>
+
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+</body>
+
 </html>

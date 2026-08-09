@@ -1,211 +1,57 @@
 <html>
+
 <head>
     <title>{{ spotify.name }}</title>
 
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <style>
-        body {
-            background: linear-gradient(
-                135deg,
-                var(--album-color),
-                #111111
-            );
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        .review-card {
-            width: 450px;
-            min-height: 500px;
-
-            padding: 30px;
-
-            background: rgba(0, 0, 0, 0.65);
-            border-radius: 20px;
-
-            text-align: left;
-
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        img {
-            border-radius: 10px;
-        }
-
-        h1, h2, p {
-            text-shadow: 2px 2px 8px black;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .review-page {
-            width: 1250px;
-            max-width: 90%;
-            margin: 60px auto;
-
-            display: flex;
-            align-items: flex-start;
-            gap: 100px;
-        }
-
-        .album-info {
-            width: 500px;
-            flex-shrink: 0;
-            text-align: center;
-        }
-
-        .review-album-art {
-            width: 500px;
-            height: 500px;
-            object-fit: cover;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-
-        .review-card {
-            width: 450px;
-            min-height: 500px;
-
-            padding: 30px;
-
-            background: rgba(0, 0, 0, 0.65);
-            border-radius: 20px;
-
-            text-align: left;
-
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .review-card h2 {
-            margin-bottom: 25px;
-        }
-
-        .review-card label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .review-card textarea {
-            width: 100%;
-            min-height: 180px;
-
-            padding: 12px;
-
-            border: none;
-            border-radius: 10px;
-
-            background: #222;
-            color: white;
-
-            font-family: inherit;
-            font-size: 1rem;
-
-            resize: vertical;
-
-            margin-bottom: 20px;
-        }
-
-        .review-card textarea:focus {
-            outline: 2px solid #555;
-        }
-
-        .review-card button {
-            width: 100%;
-
-            padding: 12px;
-
-            background: #d4d4d4;
-            color: #111;
-
-            border: none;
-            border-radius: 10px;
-
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 1rem;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-        .review-card button:hover {
-            background: white;
-            transform: scale(1.02);
-        }
-
-        .album-info h1 {
-            margin-bottom: 8px;
-        }
-
-        .album-info h2 {
-            margin-bottom: 12px;
-        }
-
-        @media (max-width: 800px) {
-
-            .review-page {
-                flex-direction: column;
-                gap: 40px;
-            }
-
-            .album-info,
-            .review-card {
-                width: 100%;
-                max-width: 500px;
-            }
-
-            .review-album-art {
-                width: 100%;
-                height: auto;
-            }
-
-        }
-    </style>
-
 </head>
 
+
 <body style="--album-color: {{ color }};">
+
+    <!-- Navigation bar -->
     <nav>
+
+        <!-- SoundScape logo -->
         <a href="/" class="logo">
             <span class="sound">sound</span><span class="scape">SCAPE</span>
         </a>
 
+        <!-- Main navigation links -->
         <div class="nav-links">
             <a href="/all_rankings">Ratings</a>
             <a href="/search">Search</a>
         </div>
+
     </nav>
 
+
+    <!-- Main ranking page -->
     <div class="page-container">
 
         <div class="review-page">
 
-    <!-- LEFT: ALBUM INFORMATION -->
-
+            <!-- LEFT SIDE: ALBUM INFORMATION -->
             <div class="album-info">
 
+                <!-- Album artwork -->
                 <img
                     src="{{ spotify.art }}"
                     class="review-album-art"
                 >
 
+                <!-- Album title and artist -->
                 <h1>{{ spotify.name }}</h1>
 
                 <h2>{{ spotify.artist }}</h2>
 
+                <!-- Album information -->
                 <p>Released: {{ spotify.release_date }}</p>
 
                 <p>Total Tracks: {{ spotify.total_tracks }}</p>
 
+                <!-- Link to Spotify -->
                 <a
                     href="{{ spotify.url }}"
                     target="_blank"
@@ -216,12 +62,15 @@
 
             </div>
 
+
+            <!-- RIGHT SIDE: RATING FORM -->
             <div class="review-card">
 
                 <h2>Rate This Album</h2>
 
                 <form method="POST">
 
+                    <!-- Star rating -->
                     <div class="rating-container">
 
                         <div class="rating-stars">
@@ -237,6 +86,7 @@
 
                         </div>
 
+                        <!-- Hidden field that stores the selected rating -->
                         <input
                             type="hidden"
                             name="rating"
@@ -247,6 +97,7 @@
                     </div>
 
 
+                    <!-- Written review -->
                     <label for="review">Review:</label>
 
                     <textarea
@@ -257,6 +108,7 @@
                     >{% if editing and reviews %}{{ reviews[0][1] }}{% endif %}</textarea>
 
 
+                    <!-- Submit button -->
                     <button type="submit">
                         {% if editing %}
                             Save Changes
@@ -273,16 +125,23 @@
 
     </div>
 
+
+    <!-- Star rating JavaScript -->
     <script>
         const stars = document.querySelectorAll(".rating-star");
         const ratingInput = document.getElementById("rating");
 
         let currentRating = parseFloat(ratingInput.value) || 0;
 
+
+        // Handle star clicks
         stars.forEach(star => {
+
             star.addEventListener("click", () => {
+
                 const rating = parseInt(star.dataset.rating);
 
+                // Clicking the same star twice changes it to a half-star.
                 if (currentRating === rating) {
                     currentRating = rating - 0.5;
                 } else {
@@ -293,29 +152,43 @@
 
                 updateStars();
             });
+
         });
 
+
+        // Update the visual appearance of the stars.
         function updateStars() {
+
             stars.forEach(star => {
+
                 const rating = parseInt(star.dataset.rating);
 
                 star.classList.remove("active");
                 star.classList.remove("half");
 
+                // Fill complete stars.
                 if (rating <= Math.floor(currentRating)) {
                     star.classList.add("active");
                 }
+
             });
 
+
+            // Display a half-filled star when necessary.
             if (currentRating % 1 !== 0) {
+
                 const halfStar = stars[Math.ceil(currentRating) - 1];
 
                 halfStar.classList.add("half");
             }
+
         }
 
+
+        // Display the current rating when the page loads.
         updateStars();
     </script>
 
 </body>
+
 </html>

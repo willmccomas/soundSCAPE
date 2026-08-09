@@ -1,142 +1,16 @@
 <html>
+
 <head>
     <title>{{ spotify.name }}</title>
 
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
-    <style>
-        body {
-            background: linear-gradient(
-                135deg,
-                var(--album-color),
-                #111111
-            );
-
-            color: white;
-        }
-
-        .review-page {
-            width: 1250px;
-            max-width: 90%;
-            margin: 60px auto;
-
-            display: flex;
-            align-items: flex-start;
-            gap: 100px;
-        }
-
-        .album-info {
-            width: 500px;
-            flex-shrink: 0;
-            text-align: center;
-        }
-
-        .review-album-art {
-            width: 500px;
-            height: 500px;
-            object-fit: cover;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-
-        .album-info h1 {
-            margin-bottom: 8px;
-        }
-
-        .album-info h2 {
-            margin-bottom: 12px;
-        }
-
-        .user-review {
-            width: 450px;
-            min-height: 300px;
-
-            margin-top: 0;
-            padding: 30px;
-
-            background: rgba(0, 0, 0, 0.65);
-            border-radius: 20px;
-
-            text-align: left;
-
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .user-review h2 {
-            margin-bottom: 15px;
-        }
-
-        .review-stars {
-            font-size: 2.2rem;
-            margin-bottom: 20px;
-        }
-
-        .review-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-
-            overflow-wrap: break-word;
-            word-break: normal;
-            white-space: normal;
-
-            margin-bottom: 25px;
-        }
-
-        .no-review {
-            color: #888;
-            font-style: italic;
-            margin-bottom: 25px;
-        }
-
-        .album-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .spotify-button {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 18px;
-
-            background-color: #1db954;
-            color: black;
-
-            text-decoration: none;
-            border-radius: 25px;
-
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .spotify-button:hover {
-            background-color: #1ed760;
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 800px) {
-            .review-page {
-                flex-direction: column;
-                gap: 40px;
-            }
-
-            .album-info,
-            .user-review {
-                width: 100%;
-                max-width: 400px;
-            }
-
-            .review-album-art {
-                width: 100%;
-                height: auto;
-            }
-        }
-    </style>
-
 </head>
+
 
 <body style="--album-color: {{ color }};">
 
+    <!-- Navigation bar -->
     <nav>
         <a href="/" class="logo">
             <span class="sound">sound</span><span class="scape">SCAPE</span>
@@ -149,23 +23,27 @@
     </nav>
 
 
+    <!-- Main review page -->
     <div class="review-page">
 
         <!-- LEFT SIDE: ALBUM INFORMATION -->
-
         <div class="album-info">
 
+            <!-- Album artwork -->
             <img
                 src="{{ spotify.art }}"
                 class="review-album-art"
             >
 
+            <!-- Album title and artist -->
             <h1>{{ spotify.name }}</h1>
 
             <h2>{{ spotify.artist }}</h2>
 
+            <!-- Album release information -->
             <p>Released: {{ spotify.release_date }}</p>
 
+            <!-- Link to the album on Spotify -->
             <a
                 href="{{ spotify.url }}"
                 target="_blank"
@@ -178,16 +56,18 @@
 
 
         <!-- RIGHT SIDE: USER REVIEW -->
-
         <div class="user-review">
 
+            <!-- Review heading -->
             <h2>Your Review:</h2>
 
+            <!-- User's star rating -->
             <div class="review-stars">
                 {{ star_rating(reviews[0][0]) }}
             </div>
 
 
+            <!-- User's written review -->
             {% if reviews[0][1] %}
 
                 <p class="review-text">
@@ -203,6 +83,7 @@
             {% endif %}
 
 
+            <!-- Edit and delete buttons -->
             <div class="album-actions">
 
                 <a
@@ -227,4 +108,5 @@
     </div>
 
 </body>
+
 </html>
