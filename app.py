@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
-from database import get_all_reviews, save_review, get_reviews, review_exists
+from database import get_all_reviews, save_review, get_reviews, review_exists, get_ratings_for_albums
 import sqlite3
 
 def star_rating(rating):
@@ -84,14 +84,20 @@ def search():
     query = request.args.get("query", "").strip()
 
     albums = []
+    ratings = {}
 
     if query:
         albums = search_albums(query)
 
+        album_ids = [album["id"] for album in albums]
+
+        ratings = get_ratings_for_albums(album_ids)
+
     return render_template(
         'search.html',
         albums=albums,
-        query=query
+        query=query,
+        ratings=ratings
     )
 
 # Edit review route

@@ -484,6 +484,7 @@ nav a:hover {
 /* Individual album result card */
 
 .album-search-card {
+    text-decoration: none;
     display: flex;
     align-items: center;
 
@@ -504,6 +505,12 @@ nav a:hover {
 
     position: relative;
     overflow: hidden;
+}
+
+/* Stars for search results */
+
+.album-search-card .stars {
+    color: white;
 }
 
 

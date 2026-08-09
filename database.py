@@ -113,5 +113,27 @@ def review_exists(album_id):
 
     return exists
 
+def get_ratings_for_albums(album_ids):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    placeholders = ",".join("?" for _ in album_ids)
+
+    if not album_ids:
+        conn.close()
+        return {}
+
+    cursor.execute(f"""
+        SELECT album_id, rating
+        FROM reviews
+        WHERE album_id IN ({placeholders})
+    """, album_ids)
+
+    ratings = cursor.fetchall()
+    conn.close()
+
+    return dict(ratings)
+
+
 if __name__ == "__main__":
     init_db()

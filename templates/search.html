@@ -64,7 +64,8 @@
                 {% for album in albums %}
 
                     <!-- Individual album search result -->
-                    <div
+                    <a
+                        href="/album/{{ album.id }}"
                         class="album-search-card"
                         style="background-image: url('{{ album.art }}');"
                     >
@@ -87,17 +88,17 @@
                                 Release Date: {{ album.release_date }}
                             </p>
 
+                            {% if album.id in ratings %}
 
-                            <!-- Go to the album's ranking page -->
-                            <a href="/album/{{ album.id }}">
-                                <button type="button">
-                                    Rate this album
-                                </button>
-                            </a>
+                                <h2 class="stars">
+                                    Your Rating: {{ star_rating(ratings[album.id]) }}
+                                </h2>
+
+                            {% endif %}
 
                         </div>
 
-                    </div>
+                    </a>
 
                 {% endfor %}
 
