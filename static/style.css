@@ -728,6 +728,53 @@ nav a:hover {
 
 
 /* =========================================================
+   QUEUE PAGE HEADER
+   ========================================================= */
+
+.queue-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 30px;
+}
+
+.pick-random-button {
+    text-decoration: none;
+}
+
+/* =========================================================
+   QUEUE BUTTON
+   ========================================================= */
+
+.album-info-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+}
+
+.queue-button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 18px;
+
+    background-color: #8b5cf6;
+    color: white;
+
+    text-decoration: none;
+    border-radius: 25px;
+
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.queue-button:hover {
+    background-color: #a78bfa;
+    transform: scale(1.05);
+}
+
+/* =========================================================
    SPOTIFY BUTTON
    ========================================================= */
 

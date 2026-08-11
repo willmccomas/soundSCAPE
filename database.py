@@ -18,9 +18,21 @@ def init_db():
             review_date TEXT
             )""")
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            album_id TEXT UNIQUE,
+            name TEXT,
+            artist TEXT,
+            art TEXT,
+            release_date TEXT,
+            added_date TEXT DEFAULT CURRENT_TIMESTAMP
+            )""")
+
     conn.commit()
     conn.close()
 
+# Reviews Database Functions
 def save_review(album_id, name, artist, art, release_date, rating, review, color):
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
@@ -62,10 +74,10 @@ def get_all_reviews(sort):
     cursor = conn.cursor()
 
     sort_options = {
-        'release_desc': 'release_date DESC',
-        'release_asc': 'release_date ASC',
-        'rating_desc': 'rating DESC',
-        'rating_asc': 'rating ASC',
+        'release_desc': 'release_date DESC, name ASC',
+        'release_asc': 'release_date ASC, name ASC',
+        'rating_desc': 'rating DESC, name ASC',
+        'rating_asc': 'rating ASC, name ASC',
         'review_asc': 'review_date ASC',
         'review_desc': 'review_date DESC',
         'name_asc': 'name ASC',
@@ -134,6 +146,87 @@ def get_ratings_for_albums(album_ids):
 
     return dict(ratings)
 
+# Queue Database Functions
+
+def add_to_queue(album_id, name, artist, art, release_date):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO queue
+        (album_id, name, artist, art, release_date)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        album_id,
+        name,
+        artist,
+        art,
+        release_date
+    ))
+
+    conn.commit()
+    conn.close()
+
+def remove_from_queue(album_id):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM queue
+        WHERE album_id = ?
+    """, (album_id,))
+
+    conn.commit()
+    conn.close()
+
+def is_in_queue(album_id):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 1
+        FROM queue
+        WHERE album_id = ?
+    """, (album_id,))
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    return result is not None
+
+def get_queue():
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT album_id, name, artist, art, release_date, added_date
+        FROM queue
+        ORDER BY added_date DESC
+    """)
+
+    albums = cursor.fetchall()
+
+    conn.close()
+
+    return albums
+
+def get_random_queue_album():
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT album_id, name, artist, art, release_date
+        FROM queue
+        ORDER BY RANDOM()
+        LIMIT 1
+    """)
+
+    album = cursor.fetchone()
+
+    conn.close()
+
+    return album
 
 if __name__ == "__main__":
     init_db()

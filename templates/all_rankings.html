@@ -21,6 +21,7 @@
         <!-- Main navigation links -->
         <div class="nav-links">
             <a href="/all_rankings">Ratings</a>
+            <a href="/queue">Queue</a>
             <a href="/search">Search</a>
         </div>
 
@@ -90,8 +91,8 @@
 
                     <!-- Newest reviewed -->
                     <a
-                        href="{{ url_for('all_rankings', sort='review_asc') }}"
-                        class="{% if current_sort == 'review_asc' %}selected{% endif %}"
+                        href="{{ url_for('all_rankings', sort='review_desc') }}"
+                        class="{% if current_sort == 'review_desc' %}selected{% endif %}"
                     >
                         Review Date: Newest
                     </a>
@@ -99,8 +100,8 @@
 
                     <!-- Oldest reviewed -->
                     <a
-                        href="{{ url_for('all_rankings', sort='review_desc') }}"
-                        class="{% if current_sort == 'review_desc' %}selected{% endif %}"
+                        href="{{ url_for('all_rankings', sort='review_asc') }}"
+                        class="{% if current_sort == 'review_asc' %}selected{% endif %}"
                     >
                         Review Date: Oldest
                     </a>

@@ -18,6 +18,7 @@
 
         <div class="nav-links">
             <a href="/all_rankings">Ratings</a>
+            <a href="/queue">Queue</a>
             <a href="/search">Search</a>
         </div>
     </nav>
@@ -42,15 +43,31 @@
 
             <!-- Album release information -->
             <p>Released: {{ spotify.release_date }}</p>
+            
+            <div class="album-info-actions">
+                
+                <!-- Add/remove to/from queue button -->
+                <a
+                    href="{{ url_for('toggle_queue', album_id=spotify.id) }}"
+                    class="queue-button"
+                >
+                    {% if in_queue %}
+                        ✓ Remove from Queue
+                    {% else %}
+                        + Add to Queue
+                    {% endif %}
+                </a>
 
-            <!-- Link to the album on Spotify -->
-            <a
-                href="{{ spotify.url }}"
-                target="_blank"
-                class="spotify-button"
-            >
-                Open in Spotify
-            </a>
+                <!-- Link to the album on Spotify -->
+                <a
+                    href="{{ spotify.url }}"
+                    target="_blank"
+                    class="spotify-button"
+                >
+                    Open in Spotify
+                </a>
+
+            </div>
 
         </div>
 
@@ -106,6 +123,17 @@
         </div>
 
     </div>
+
+    <script>
+        const queueButton = document.querySelector(".queue-button");
+
+        if (queueButton) {
+            queueButton.addEventListener("click", function () {
+                queueButton.style.pointerEvents = "none";
+                queueButton.style.opacity = "0.6";
+            });
+        }
+    </script>
 
 </body>
 

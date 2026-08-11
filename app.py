@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
-from database import get_all_reviews, save_review, get_reviews, review_exists, get_ratings_for_albums
+from database import get_all_reviews, save_review, get_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
 import sqlite3
 
 def star_rating(rating):
@@ -46,6 +46,7 @@ def album_review(album_id):
 
     spotify_data = get_album(album_id)
     reviews = get_reviews(album_id)
+    in_queue = is_in_queue(album_id)
 
     color = get_dom_color(spotify_data['art'])
     color = f"rgb{color}"
@@ -54,24 +55,22 @@ def album_review(album_id):
         rating = float(request.form.get("rating"))
         review = request.form.get("review")
 
-        color = get_dom_color(spotify_data['art'])
-        color = f"rgb{color}"
-
         save_review(album_id, spotify_data["name"], spotify_data["artist"], spotify_data["art"], spotify_data["release_date"], rating, review, color)
 
         return redirect(url_for('ranking', album_id=album_id))
     
-    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews)
+    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, in_queue=in_queue)
 
 # Personal ranking page route
 @app.route('/ranking/<album_id>')
 def ranking(album_id):
     spotify_data = get_album(album_id)
     reviews = get_reviews(album_id)
+    in_queue = is_in_queue(album_id)
 
     color = reviews[0][2]
 
-    return render_template('ranking.html', spotify=spotify_data, reviews=reviews, color=color)
+    return render_template('ranking.html', spotify=spotify_data, reviews=reviews, color=color,in_queue=in_queue)
 
 # Search results page route
 @app.route('/search_results')
@@ -99,6 +98,53 @@ def search():
         query=query,
         ratings=ratings
     )
+
+# Queue page route
+@app.route('/queue')
+def queue():
+    albums = get_queue()
+    reviews = get_all_reviews('release_desc')
+
+    reviewed_album_ids = {review[0] for review in reviews}
+
+    return render_template(
+        'queue.html',
+        albums=albums,
+        reviewed_album_ids=reviewed_album_ids
+    )
+
+# Toggle queue route
+@app.route('/toggle_queue/<album_id>')
+def toggle_queue(album_id):
+    spotify_data = get_album(album_id)
+
+    if is_in_queue(album_id):
+        remove_from_queue(album_id)
+    else:
+        add_to_queue(
+            album_id,
+            spotify_data["name"],
+            spotify_data["artist"],
+            spotify_data["art"],
+            spotify_data["release_date"]
+        )
+
+    return redirect(request.referrer or url_for('queue'))
+
+# Pick a random album from queue route
+@app.route('/random_queue')
+def random_queue():
+    album = get_random_queue_album()
+
+    if not album:
+        return redirect(url_for('queue'))
+
+    album_id = album[0]
+
+    if review_exists(album_id):
+        return redirect(url_for('ranking', album_id=album_id))
+    else:
+        return redirect(url_for('album_review', album_id=album_id))
 
 # Edit review route
 @app.route('/edit_review/<album_id>', methods=["GET", "Post"])
