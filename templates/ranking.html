@@ -42,7 +42,7 @@
             <h2>{{ spotify.artist }}</h2>
 
             <!-- Album release information -->
-            <p>Released: {{ spotify.release_date }}</p>
+            <p>Released: {{ format_release_date(spotify.release_date) }}</p>
             
             <div class="album-info-actions">
                 

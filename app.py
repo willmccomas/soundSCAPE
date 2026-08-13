@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
-from database import get_all_reviews, save_review, get_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
+from database import format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
 import sqlite3
 
 def star_rating(rating):
@@ -23,7 +23,9 @@ app.jinja_env.globals.update(star_rating=star_rating)
 # Home page route
 @app.route('/')
 def home():
-    return render_template('index.html')
+    recent_reviews = get_recent_reviews()
+
+    return render_template('index.html', recent_reviews=recent_reviews, days_ago=days_ago, format_release_date=format_release_date)
 
 # All rankings page route
 @app.route('/all_rankings')
@@ -59,7 +61,7 @@ def album_review(album_id):
 
         return redirect(url_for('ranking', album_id=album_id))
     
-    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, in_queue=in_queue)
+    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, in_queue=in_queue, format_release_date=format_release_date)
 
 # Personal ranking page route
 @app.route('/ranking/<album_id>')
@@ -70,12 +72,7 @@ def ranking(album_id):
 
     color = reviews[0][2]
 
-    return render_template('ranking.html', spotify=spotify_data, reviews=reviews, color=color,in_queue=in_queue)
-
-# Search results page route
-@app.route('/search_results')
-def search_results():
-    return render_template('search_results.html')
+    return render_template('ranking.html', spotify=spotify_data, reviews=reviews, color=color,in_queue=in_queue, format_release_date=format_release_date)
 
 # Search page route
 @app.route('/search')
@@ -93,11 +90,7 @@ def search():
         ratings = get_ratings_for_albums(album_ids)
 
     return render_template(
-        'search.html',
-        albums=albums,
-        query=query,
-        ratings=ratings
-    )
+        'search.html', albums=albums, query=query, ratings=ratings, format_release_date=format_release_date)
 
 # Queue page route
 @app.route('/queue')

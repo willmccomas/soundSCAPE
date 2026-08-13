@@ -146,6 +146,53 @@ def get_ratings_for_albums(album_ids):
 
     return dict(ratings)
 
+def get_recent_reviews():
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT album_id, name, artist, art, release_date, rating, review, review_date
+        FROM reviews
+        ORDER BY review_date DESC
+        LIMIT 5
+    """)
+
+    reviews = cursor.fetchall()
+    conn.close()
+
+    return reviews
+
+def days_ago(review_date):
+    review_date = datetime.fromisoformat(review_date).date()
+    today = datetime.today().date()
+
+    days = (today - review_date).days
+
+    if days == 0:
+        return "Rated today"
+    elif days == 1:
+        return "Rated yesterday"
+    else:
+        return f"Rated {days} days ago"
+
+def format_release_date(release_date):
+    date = datetime.strptime(release_date, "%Y-%m-%d")
+
+    day = date.day
+
+    if 11 <= day <= 13:
+        suffix = "th"
+    elif day % 10 == 1:
+        suffix = "st"
+    elif day % 10 == 2:
+        suffix = "nd"
+    elif day % 10 == 3:
+        suffix = "rd"
+    else:
+        suffix = "th"
+
+    return f"{date.strftime('%B')} {day}{suffix}, {date.year}"
+
 # Queue Database Functions
 
 def add_to_queue(album_id, name, artist, art, release_date):

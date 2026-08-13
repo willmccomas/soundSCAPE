@@ -31,9 +31,54 @@
     <!-- Main page content -->
     <div class="page-container">
 
-        <h1>Welcome to soundSCAPE</h1>
+        <div class="home-header">
 
-        <p>Coming soon...</p>
+            <h1>Home</h1>
+
+        </div>
+
+
+        <div class="recent-ratings">
+
+            <h2>Recently Rated</h2>
+
+            {% for album in recent_reviews %}
+
+                <div class="album-search-card" style="background-image: url('{{ album[3] }}');">
+
+                    <!-- Album artwork -->
+                    <a href="{{ url_for('ranking', album_id=album[0]) }}">
+                        <img
+                            src="{{ album[3] }}"
+                            width="200"
+                            alt="{{ album[1] }} album cover"
+                        >
+                    </a>
+
+                    <!-- Album information -->
+                    <div class="search-album-info">
+
+                        <h2>{{ album[1] }}</h2>
+
+                        <p>{{ album[2] }}</p>
+
+                        <p>
+                            Release Date: {{ format_release_date(album[4]) }}
+                        </p>
+
+                        <div class="stars">
+                            {{ star_rating(album[5]) }}
+                        </div>
+
+                        <h2>{{ days_ago(album[7]) }}</h2>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
 
     </div>
 

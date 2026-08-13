@@ -86,7 +86,7 @@
                             <p>{{ album.artist }}</p>
 
                             <p>
-                                Release Date: {{ album.release_date }}
+                                Release Date: {{ format_release_date(album.release_date) }}
                             </p>
 
                             {% if album.id in ratings %}

@@ -26,6 +26,8 @@ The project started as a simple album review website and has grown into a person
 * Generate dynamic album-themed page backgrounds
 * Responsive layout for smaller screens
 * Persistent review data using SQLite
+* Personal album queue
+* Random album selection from the queue
 
 ## Technologies Used
 
