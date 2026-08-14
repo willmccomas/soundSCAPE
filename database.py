@@ -176,6 +176,9 @@ def days_ago(review_date):
         return f"Rated {days} days ago"
 
 def format_release_date(release_date):
+    if len(release_date) == 4:
+        return release_date
+
     date = datetime.strptime(release_date, "%Y-%m-%d")
 
     day = date.day

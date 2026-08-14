@@ -6,6 +6,50 @@ from pprint import pprint
 
 load_dotenv()
 
+# Dictionary for albums not on spotify
+
+CUSTOM_ALBUMS = {
+    "owl_pharaoh": {
+        "name": "Owl Pharaoh",
+        "artist": "Travis Scott",
+        "release_date": "2013-05-21",
+        "total_tracks": 14,
+        "url": "",
+        "art": "/static/images/owl_pharaoh.jpg",
+        "id": "owl_pharaoh"
+    },
+
+    "nostalgia_ULTRA": {
+        "name": "nostalgia, ULTRA",
+        "artist": "Frank Ocean",
+        "release_date": "2011-02-16",
+        "total_tracks": 14,
+        "url": "",
+        "art": "/static/images/nostalgia_ULTRA.jpg",
+        "id": "nostalgia_ULTRA"
+    },
+
+    "see_u_soon": {
+        "name": "see u soon </3",
+        "artist": "Destroy Lonely",
+        "release_date": "2025-06-05",
+        "total_tracks": 5,
+        "url": "",
+        "art": "/static/images/see_u_soon.jpg",
+        "id": "see_u_soon"
+    },
+
+    "2_much_music": {
+        "name": "2 much music </3",
+        "artist": "Destroy Lonely",
+        "release_date": "2025-09-28",
+        "total_tracks": 5,
+        "url": "",
+        "art": "/static/images/2_much_music.jpeg",
+        "id": "2_much_music"
+    }
+}
+
 spotify = spotipy.Spotify(
     auth_manager = SpotifyClientCredentials(
         client_id = os.getenv("SPOTIFY_CLIENT_ID"),
@@ -14,6 +58,9 @@ spotify = spotipy.Spotify(
 )
 
 def get_album(album_id):
+    if album_id in CUSTOM_ALBUMS:
+        return CUSTOM_ALBUMS[album_id]
+
     album = spotify.album(album_id)
 
     album_name = album['name']
@@ -66,6 +113,16 @@ def search_albums(query):
             "art": album_art,
             "id": album_id
         })
+
+        query_lower = query.lower()
+
+    for album in CUSTOM_ALBUMS.values():
+        if (
+            query_lower in album["name"].lower()
+            or query_lower in album["artist"].lower()
+        ):
+            albums.append(album)
+
     return albums
 
 def format_artists(artists):

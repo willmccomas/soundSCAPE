@@ -771,6 +771,7 @@ nav a:hover {
 }
 
 .queue-header .pick-random-button {
+    text-decoration: none;
     grid-column: 3;
     justify-self: end;
 }

@@ -59,14 +59,16 @@
                 </a>
 
                 <!-- Link to the album on Spotify -->
-                <a
-                    href="{{ spotify.url }}"
-                    target="_blank"
-                    class="spotify-button"
-                >
-                    Open in Spotify
-                </a>
-
+                 {% if spotify.url %}
+                    <a
+                        href="{{ spotify.url }}"
+                        target="_blank"
+                        class="spotify-button"
+                    >
+                        Open in Spotify
+                    </a>
+                {% endif %}
+                
             </div>
 
         </div>

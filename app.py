@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, session, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
 from database import format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
@@ -17,6 +17,7 @@ def star_rating(rating):
     return stars
 
 app = Flask(__name__)
+app.secret_key = "Key_Secret812"
 
 app.jinja_env.globals.update(star_rating=star_rating)
 
@@ -30,7 +31,12 @@ def home():
 # All rankings page route
 @app.route('/all_rankings')
 def all_rankings():
-    sort = request.args.get('sort', 'release_desc')
+    sort = request.args.get('sort')
+
+    if sort:
+        session['sort'] = sort
+    else:
+        sort = session.get('sort', 'release_desc')
 
     reviews = get_all_reviews(sort)
 
@@ -165,7 +171,7 @@ def edit_review(album_id):
 
     color = reviews[0][2]
 
-    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, editing=True)
+    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, editing=True, format_release_date=format_release_date)
 
 # Delete review route
 @app.route('/delete_review/<album_id>')

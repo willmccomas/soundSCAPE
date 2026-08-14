@@ -5,3 +5,4 @@ __pycache__/
 .env
 soundSCAPE_dev_log.docx
 reviews.db
+static/images/
