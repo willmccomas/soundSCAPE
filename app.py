@@ -1,7 +1,7 @@
 from flask import Flask, session, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
-from database import format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
+from database import get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
 import sqlite3
 
 def star_rating(rating):
@@ -39,12 +39,9 @@ def all_rankings():
         sort = session.get('sort', 'release_desc')
 
     reviews = get_all_reviews(sort)
+    rating_counts = get_rating_counts()
 
-    return render_template(
-        'all_rankings.html',
-        albums=reviews,
-        current_sort=sort
-    )
+    return render_template('all_rankings.html', albums=reviews, current_sort=sort, rating_counts=rating_counts)
 
 # Album ranking form page route
 @app.route('/album/<album_id>', methods=["GET", "POST"])

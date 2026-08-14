@@ -55,7 +55,7 @@
 
                     <!-- Release date — newest first -->
                     <a
-                        href="{{ url_for('all_rankings', sort='release_desc') }}"
+                        href="{{ url_for('all_rankings', sort='release_desc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'release_desc' %}selected{% endif %}"
                     >
                         Release Date: Newest
@@ -64,7 +64,7 @@
 
                     <!-- Release date — oldest first -->
                     <a
-                        href="{{ url_for('all_rankings', sort='release_asc') }}"
+                        href="{{ url_for('all_rankings', sort='release_asc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'release_asc' %}selected{% endif %}"
                     >
                         Release Date: Oldest
@@ -73,7 +73,7 @@
 
                     <!-- Highest rated -->
                     <a
-                        href="{{ url_for('all_rankings', sort='rating_desc') }}"
+                        href="{{ url_for('all_rankings', sort='rating_desc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'rating_desc' %}selected{% endif %}"
                     >
                         Highest Rated
@@ -82,7 +82,7 @@
 
                     <!-- Lowest rated -->
                     <a
-                        href="{{ url_for('all_rankings', sort='rating_asc') }}"
+                        href="{{ url_for('all_rankings', sort='rating_asc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'rating_asc' %}selected{% endif %}"
                     >
                         Lowest Rated
@@ -91,7 +91,7 @@
 
                     <!-- Newest reviewed -->
                     <a
-                        href="{{ url_for('all_rankings', sort='review_desc') }}"
+                        href="{{ url_for('all_rankings', sort='review_desc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'review_desc' %}selected{% endif %}"
                     >
                         Review Date: Newest
@@ -100,7 +100,7 @@
 
                     <!-- Oldest reviewed -->
                     <a
-                        href="{{ url_for('all_rankings', sort='review_asc') }}"
+                        href="{{ url_for('all_rankings', sort='review_asc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'review_asc' %}selected{% endif %}"
                     >
                         Review Date: Oldest
@@ -109,7 +109,7 @@
 
                     <!-- Album name A-Z -->
                     <a
-                        href="{{ url_for('all_rankings', sort='name_asc') }}"
+                        href="{{ url_for('all_rankings', sort='name_asc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'name_asc' %}selected{% endif %}"
                     >
                         Album A–Z
@@ -118,7 +118,7 @@
 
                     <!-- Album name Z-A -->
                     <a
-                        href="{{ url_for('all_rankings', sort='name_desc') }}"
+                        href="{{ url_for('all_rankings', sort='name_desc', rating=request.args.get('rating')) }}"
                         class="{% if current_sort == 'name_desc' %}selected{% endif %}"
                     >
                         Album Z–A
@@ -130,6 +130,30 @@
 
         </div>
 
+        <div class="rating-distribution">
+
+            {% for rating, count in rating_counts.items() %}
+
+                <div class="rating-bar-container">
+
+                    <div
+                        class="rating-bar"
+                        data-rating="{{ rating }}"
+                        data-count="{{ count }}"
+                        style="--bar-height: {{ count * 3.5 }}px;"
+                        onclick="filter_by_rating(this)"
+                    ></div>
+
+                    <div class="rating-label">
+                        {{ star_rating(rating) }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
 
         <!-- Album grid -->
         <div class="album-grid">
@@ -137,7 +161,7 @@
             {% for album in albums %}
 
                 <!-- Individual album -->
-                <div class="album-card">
+                <div class="album-card" data-rating="{{ album[5] }}">
 
                     <!-- Album artwork links to the album's review -->
                     <a href="{{ url_for('ranking', album_id=album[0]) }}">
@@ -184,6 +208,100 @@
                 document
                     .getElementById("sort-menu")
                     .classList.remove("show");
+
+            }
+
+        });
+
+    </script>
+
+    <script>
+
+        function filter_by_rating(bar) {
+
+        const rating = bar.dataset.rating;
+        const url = new URL(window.location.href);
+        url.searchParams.set("rating", rating);
+        history.pushState({}, "", url);
+        const count = bar.dataset.count;
+
+        const bars = document.querySelectorAll(".rating-bar");
+        const albums = document.querySelectorAll(".album-card");
+
+        // If clicking the already-selected bar, reset everything
+        if (bar.classList.contains("selected")) {
+
+            bars.forEach(function(b) {
+                b.classList.remove("selected");
+                b.classList.remove("dimmed");
+
+                const oldCount = b.parentElement.querySelector(".rating-count");
+
+                if (oldCount) {
+                    oldCount.remove();
+                }
+            });
+
+            albums.forEach(function(album) {
+                album.style.display = "";
+            });
+
+            return;
+        }
+
+        // Reset all bars
+        bars.forEach(function(b) {
+            b.classList.remove("selected");
+            b.classList.add("dimmed");
+
+            const oldCount = b.parentElement.querySelector(".rating-count");
+
+            if (oldCount) {
+                oldCount.remove();
+            }
+        });
+
+        // Highlight selected bar
+        bar.classList.remove("dimmed");
+        bar.classList.add("selected");
+
+        // Add count above selected bar
+        const countLabel = document.createElement("div");
+        countLabel.className = "rating-count";
+        countLabel.textContent = count;
+
+        bar.parentElement.insertBefore(countLabel, bar);
+
+        // Filter albums
+        albums.forEach(function(album) {
+
+            if (album.dataset.rating === rating) {
+                album.style.display = "";
+            } else {
+                album.style.display = "none";
+            }
+
+        });
+        }
+
+    </script>
+
+    <script>
+
+        window.addEventListener("DOMContentLoaded", function() {
+
+            const params = new URLSearchParams(window.location.search);
+            const rating = params.get("rating");
+
+            if (rating) {
+
+                const bar = document.querySelector(
+                    `.rating-bar[data-rating="${rating}"]`
+                );
+
+                if (bar) {
+                    filter_by_rating(bar);
+                }
 
             }
 

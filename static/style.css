@@ -317,6 +317,62 @@ nav a:hover {
 
 
 /* =========================================================
+   RATING BAR GRAPH
+   ========================================================= */
+
+.rating-distribution {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 80%;
+    height: 200px;
+    margin: 20px auto 80px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.rating-bar-container {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.rating-bar {
+    width: 98%;
+    height: var(--bar-height);
+    background: #555;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+.rating-bar:hover {
+    opacity: 0.8;
+}
+
+.rating-bar.selected {
+    background: linear-gradient(180deg, #6EE7FF, #A855F7)
+}
+
+.rating-bar.dimmed {
+    opacity: 0.25;
+}
+
+.rating-count {
+    font-size: 12px;
+    margin-bottom: 5px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.rating-label {
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+/* =========================================================
    ALBUM GRID
    Used on pages that display multiple albums.
    ========================================================= */

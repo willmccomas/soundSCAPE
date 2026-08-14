@@ -98,6 +98,29 @@ def get_all_reviews(sort):
 
     return reviews
 
+def get_rating_counts():
+    conn = sqlite3.connect("reviews.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT rating, COUNT(*)
+        FROM reviews
+        GROUP BY rating
+        ORDER BY rating
+    """)
+
+    results = cursor.fetchall()
+
+    conn.close()
+
+    counts = {rating: count for rating, count in results}
+
+    for rating in [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]:
+        if rating not in counts:
+            counts[rating] = 0
+
+    return dict(sorted(counts.items()))
+
 def has_reviews(album_id):
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
