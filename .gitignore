@@ -4,5 +4,4 @@ __pycache__/
 .venv/
 .env
 soundSCAPE_dev_log.docx
-reviews.db
 static/images/
