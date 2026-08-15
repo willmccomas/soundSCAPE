@@ -26,6 +26,7 @@ def init_db():
             artist TEXT,
             art TEXT,
             release_date TEXT,
+            color TEXT,
             added_date TEXT DEFAULT CURRENT_TIMESTAMP
             )""")
 
@@ -256,22 +257,39 @@ def format_release_date(release_date):
 
     return f"{date.strftime('%B')} {day}{suffix}, {date.year}"
 
+def get_review_color(album_id):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT color
+        FROM reviews
+        WHERE album_id = ?
+    """, (album_id,))
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    return result[0] if result else None
+
 # Queue Database Functions
 
-def add_to_queue(album_id, name, artist, art, release_date):
+def add_to_queue(album_id, name, artist, art, release_date, color):
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
     cursor.execute("""
         INSERT INTO queue
-        (album_id, name, artist, art, release_date)
-        VALUES (?, ?, ?, ?, ?)
+        (album_id, name, artist, art, release_date, color)
+        VALUES (?, ?, ?, ?, ?, ?)
     """, (
         album_id,
         name,
         artist,
         art,
-        release_date
+        release_date,
+        color
     ))
 
     conn.commit()
@@ -337,6 +355,25 @@ def get_random_queue_album():
     conn.close()
 
     return album
+
+def get_queue_color(album_id):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT color
+        FROM queue
+        WHERE album_id = ?
+    """, (album_id,))
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    if result:
+        return result[0]
+
+    return None
 
 if __name__ == "__main__":
     init_db()

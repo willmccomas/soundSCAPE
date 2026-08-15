@@ -1,7 +1,7 @@
 from flask import Flask, session, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
-from database import get_review_years, get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
+from database import get_review_color, get_queue_color, get_review_years, get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
 import sqlite3
 
 def star_rating(rating):
@@ -55,8 +55,11 @@ def album_review(album_id):
     reviews = get_reviews(album_id)
     in_queue = is_in_queue(album_id)
 
-    color = get_dom_color(spotify_data['art'])
-    color = f"rgb{color}"
+    color = get_queue_color(album_id)
+
+    if color is None:
+        color = get_dom_color(spotify_data['art'])
+        color = f"rgb{color}"
 
     if request.method == "POST":
         rating = float(request.form.get("rating"))
@@ -119,12 +122,19 @@ def toggle_queue(album_id):
     if is_in_queue(album_id):
         remove_from_queue(album_id)
     else:
+        if review_exists(album_id):
+            color = get_review_color(album_id)
+        else:
+            color = get_dom_color(spotify_data["art"])
+            color = f"rgb{color}"
+
         add_to_queue(
             album_id,
             spotify_data["name"],
             spotify_data["artist"],
             spotify_data["art"],
-            spotify_data["release_date"]
+            spotify_data["release_date"],
+            color
         )
 
     return redirect(request.referrer or url_for('queue'))
