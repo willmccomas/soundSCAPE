@@ -36,6 +36,8 @@
 
             <h1>Ratings</h1>
 
+            <div class="header-actions">
+
             <!-- Sort dropdown -->
             <div class="sort-container">
 
@@ -55,7 +57,7 @@
 
                     <!-- Release date — newest first -->
                     <a
-                        href="{{ url_for('all_rankings', sort='release_desc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='release_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'release_desc' %}selected{% endif %}"
                     >
                         Release Date: Newest
@@ -64,7 +66,7 @@
 
                     <!-- Release date — oldest first -->
                     <a
-                        href="{{ url_for('all_rankings', sort='release_asc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='release_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'release_asc' %}selected{% endif %}"
                     >
                         Release Date: Oldest
@@ -73,7 +75,7 @@
 
                     <!-- Highest rated -->
                     <a
-                        href="{{ url_for('all_rankings', sort='rating_desc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='rating_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'rating_desc' %}selected{% endif %}"
                     >
                         Highest Rated
@@ -82,7 +84,7 @@
 
                     <!-- Lowest rated -->
                     <a
-                        href="{{ url_for('all_rankings', sort='rating_asc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='rating_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'rating_asc' %}selected{% endif %}"
                     >
                         Lowest Rated
@@ -91,7 +93,7 @@
 
                     <!-- Newest reviewed -->
                     <a
-                        href="{{ url_for('all_rankings', sort='review_desc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='review_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'review_desc' %}selected{% endif %}"
                     >
                         Review Date: Newest
@@ -100,7 +102,7 @@
 
                     <!-- Oldest reviewed -->
                     <a
-                        href="{{ url_for('all_rankings', sort='review_asc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='review_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'review_asc' %}selected{% endif %}"
                     >
                         Review Date: Oldest
@@ -109,7 +111,7 @@
 
                     <!-- Album name A-Z -->
                     <a
-                        href="{{ url_for('all_rankings', sort='name_asc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='name_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'name_asc' %}selected{% endif %}"
                     >
                         Album A–Z
@@ -118,13 +120,53 @@
 
                     <!-- Album name Z-A -->
                     <a
-                        href="{{ url_for('all_rankings', sort='name_desc', rating=request.args.get('rating')) }}"
+                        href="{{ url_for('all_rankings', sort='name_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
                         class="{% if current_sort == 'name_desc' %}selected{% endif %}"
                     >
                         Album Z–A
                     </a>
 
                 </div>
+
+            </div>
+
+            <div class="filter-container">
+
+                <button
+                    type="button"
+                    class="sort-button"
+                    onclick="toggleFilterMenu()"
+                >
+                    Filter ▾
+                </button>
+
+                <div
+                    id="filter-menu"
+                    class="filter-menu"
+                >
+
+                    <label for="year-filter">Year</label>
+
+                    <select id="year-filter" onchange="filterByYear()">
+
+                        <option value="" {% if not request.args.get('year') %}selected{% endif %}>
+                            All Years
+                        </option>
+
+                        {% for year in years %}
+                            <option
+                                value="{{ year }}"
+                                {% if request.args.get('year') == year|string %}selected{% endif %}
+                            >
+                                {{ year }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
 
             </div>
 
@@ -189,11 +231,35 @@
     <script>
 
         function toggleSortMenu() {
+            const sortMenu = document.getElementById("sort-menu");
+            const filterMenu = document.getElementById("filter-menu");
 
-            const menu = document.getElementById("sort-menu");
+            filterMenu.classList.remove("show");
+            sortMenu.classList.toggle("show");
+        }
 
-            menu.classList.toggle("show");
+        function toggleFilterMenu() {
+            const filterMenu = document.getElementById("filter-menu");
+            const sortMenu = document.getElementById("sort-menu");
 
+            sortMenu.classList.remove("show");
+            filterMenu.classList.toggle("show");
+        }
+
+        function filterByYear() {
+            const year = document.getElementById("year-filter").value;
+
+            const url = new URL(window.location.href);
+
+            if (year) {
+                url.searchParams.set("year", year);
+            } else {
+                url.searchParams.delete("year");
+            }
+
+            url.searchParams.delete("rating");
+
+            window.location.href = url.toString();
         }
 
 
@@ -217,71 +283,108 @@
 
     <script>
 
-        function filter_by_rating(bar) {
+        function filter_by_rating(bar, updateURL = true) {
 
-        const rating = bar.dataset.rating;
-        const url = new URL(window.location.href);
-        url.searchParams.set("rating", rating);
-        history.pushState({}, "", url);
-        const count = bar.dataset.count;
+            const rating = bar.dataset.rating;
+            const count = bar.dataset.count;
 
-        const bars = document.querySelectorAll(".rating-bar");
-        const albums = document.querySelectorAll(".album-card");
+            const bars = document.querySelectorAll(".rating-bar");
+            const albums = document.querySelectorAll(".album-card");
 
-        // If clicking the already-selected bar, reset everything
-        if (bar.classList.contains("selected")) {
+            // If clicking the already-selected bar, reset everything
+            if (bar.classList.contains("selected")) {
 
+                bars.forEach(function(b) {
+
+                    b.classList.remove("selected");
+                    b.classList.remove("dimmed");
+
+                    const oldCount =
+                        b.parentElement.querySelector(".rating-count");
+
+                    if (oldCount) {
+                        oldCount.remove();
+                    }
+
+                });
+
+                albums.forEach(function(album) {
+                    album.style.display = "";
+                });
+
+                // Only change URL when the user actually clicked
+                if (updateURL) {
+
+                    const url = new URL(window.location.href);
+
+                    url.searchParams.delete("rating");
+
+                    history.pushState({}, "", url);
+
+                }
+
+                return;
+            }
+
+            // Reset all bars
             bars.forEach(function(b) {
-                b.classList.remove("selected");
-                b.classList.remove("dimmed");
 
-                const oldCount = b.parentElement.querySelector(".rating-count");
+                b.classList.remove("selected");
+                b.classList.add("dimmed");
+
+                const oldCount =
+                    b.parentElement.querySelector(".rating-count");
 
                 if (oldCount) {
                     oldCount.remove();
                 }
+
             });
 
+            // Highlight selected bar
+            bar.classList.remove("dimmed");
+            bar.classList.add("selected");
+
+            // Add count above selected bar
+            const countLabel = document.createElement("div");
+
+            countLabel.className = "rating-count";
+            countLabel.textContent = count;
+
+            bar.parentElement.insertBefore(countLabel, bar);
+
+            // Filter albums
             albums.forEach(function(album) {
-                album.style.display = "";
+
+                if (album.dataset.rating === rating) {
+                    album.style.display = "";
+                } else {
+                    album.style.display = "none";
+                }
+
             });
 
-            return;
-        }
+            // Only change URL when the user actually clicked
+            if (updateURL) {
 
-        // Reset all bars
-        bars.forEach(function(b) {
-            b.classList.remove("selected");
-            b.classList.add("dimmed");
+                const url = new URL(window.location.href);
 
-            const oldCount = b.parentElement.querySelector(".rating-count");
+                url.searchParams.set("rating", rating);
 
-            if (oldCount) {
-                oldCount.remove();
-            }
-        });
+                history.pushState({}, "", url);
 
-        // Highlight selected bar
-        bar.classList.remove("dimmed");
-        bar.classList.add("selected");
+                document.querySelectorAll(".sort-menu a").forEach(function(link) {
 
-        // Add count above selected bar
-        const countLabel = document.createElement("div");
-        countLabel.className = "rating-count";
-        countLabel.textContent = count;
+                    const sortURL = new URL(link.href);
 
-        bar.parentElement.insertBefore(countLabel, bar);
+                    sortURL.searchParams.set("rating", rating);
 
-        // Filter albums
-        albums.forEach(function(album) {
+                    link.href = sortURL.toString();
 
-            if (album.dataset.rating === rating) {
-                album.style.display = "";
-            } else {
-                album.style.display = "none";
+                });
+
             }
 
-        });
         }
 
     </script>
@@ -300,7 +403,7 @@
                 );
 
                 if (bar) {
-                    filter_by_rating(bar);
+                    filter_by_rating(bar, false);
                 }
 
             }

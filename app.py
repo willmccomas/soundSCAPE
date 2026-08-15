@@ -1,7 +1,7 @@
 from flask import Flask, session, render_template, request, url_for, redirect
 from spotify_api import get_album, search_albums
 from image_colors import get_dom_color
-from database import get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
+from database import get_review_years, get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
 import sqlite3
 
 def star_rating(rating):
@@ -32,16 +32,18 @@ def home():
 @app.route('/all_rankings')
 def all_rankings():
     sort = request.args.get('sort')
+    year = request.args.get('year')
 
     if sort:
         session['sort'] = sort
     else:
         sort = session.get('sort', 'release_desc')
 
-    reviews = get_all_reviews(sort)
-    rating_counts = get_rating_counts()
+    reviews = get_all_reviews(sort, year)
+    rating_counts = get_rating_counts(year)
+    years = get_review_years()
 
-    return render_template('all_rankings.html', albums=reviews, current_sort=sort, rating_counts=rating_counts)
+    return render_template('all_rankings.html', albums=reviews, current_sort=sort, rating_counts=rating_counts, years=years)
 
 # Album ranking form page route
 @app.route('/album/<album_id>', methods=["GET", "POST"])

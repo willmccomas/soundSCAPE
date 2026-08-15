@@ -69,7 +69,7 @@ def get_reviews(album_id):
     conn.close()
     return reviews
 
-def get_all_reviews(sort):
+def get_all_reviews(sort, year=None):
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -86,11 +86,20 @@ def get_all_reviews(sort):
 
     order_by = sort_options.get(sort, 'release_date DESC')
 
-    cursor.execute(f"""
+    query = f"""
         SELECT album_id, name, artist, art, release_date, rating, review
         FROM reviews
-        ORDER BY {order_by}
-    """)
+    """
+
+    params = []
+
+    if year:
+        query += " WHERE release_date LIKE ?"
+        params.append(f"{year}%")
+
+    query += f" ORDER BY {order_by}"
+
+    cursor.execute(query, params)
 
     reviews = cursor.fetchall()
 
@@ -98,16 +107,27 @@ def get_all_reviews(sort):
 
     return reviews
 
-def get_rating_counts():
+def get_rating_counts(year=None):
     conn = sqlite3.connect("reviews.db")
     cursor = conn.cursor()
 
-    cursor.execute("""
+    query = """
         SELECT rating, COUNT(*)
         FROM reviews
+    """
+
+    params = []
+
+    if year:
+        query += " WHERE release_date LIKE ?"
+        params.append(f"{year}%")
+
+    query += """
         GROUP BY rating
         ORDER BY rating
-    """)
+    """
+
+    cursor.execute(query, params)
 
     results = cursor.fetchall()
 
@@ -120,6 +140,23 @@ def get_rating_counts():
             counts[rating] = 0
 
     return dict(sorted(counts.items()))
+
+def get_review_years():
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT DISTINCT SUBSTR(release_date, 1, 4)
+        FROM reviews
+        WHERE release_date IS NOT NULL
+        ORDER BY SUBSTR(release_date, 1, 4) DESC
+    """)
+
+    years = [row[0] for row in cursor.fetchall()]
+
+    conn.close()
+
+    return years
 
 def has_reviews(album_id):
     conn = sqlite3.connect('reviews.db')
