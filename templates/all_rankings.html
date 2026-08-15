@@ -321,6 +321,16 @@
 
                     history.pushState({}, "", url);
 
+                    document.querySelectorAll(".sort-menu a").forEach(function(link) {
+
+                        const sortURL = new URL(link.href);
+
+                        sortURL.searchParams.delete("rating");
+
+                        link.href = sortURL.toString();
+
+                    });
+
                 }
 
                 return;
