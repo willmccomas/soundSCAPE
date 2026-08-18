@@ -15,7 +15,8 @@ def init_db():
             rating REAL,
             review TEXT,
             color TEXT,
-            review_date TEXT
+            review_date TEXT,
+            apple_music_url TEXT
             )""")
 
     cursor.execute("""
@@ -27,6 +28,7 @@ def init_db():
             art TEXT,
             release_date TEXT,
             color TEXT,
+            apple_music_url TEXT,
             added_date TEXT DEFAULT CURRENT_TIMESTAMP
             )""")
 
@@ -34,14 +36,14 @@ def init_db():
     conn.close()
 
 # Reviews Database Functions
-def save_review(album_id, name, artist, art, release_date, rating, review, color):
+def save_review(album_id, name, artist, art, release_date, rating, review, color, apple_music_url):
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
     review_date = datetime.now().isoformat()
     cursor.execute("""
     INSERT INTO reviews
-    (album_id, name, artist, art, release_date, rating, review, color, review_date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (album_id, name, artist, art, release_date, rating, review, color, review_date, apple_music_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
     (
         album_id,
@@ -52,7 +54,8 @@ def save_review(album_id, name, artist, art, release_date, rating, review, color
         rating,
         review,
         color,
-        review_date
+        review_date,
+        apple_music_url
     ))
 
     conn.commit()
@@ -273,23 +276,93 @@ def get_review_color(album_id):
 
     return result[0] if result else None
 
+def get_review_apple_music_url(album_id):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT apple_music_url
+        FROM reviews
+        WHERE album_id = ?
+    """, (album_id,))
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    if result:
+        return result[0]
+
+    return None
+
+def get_saved_apple_music_url(album_id):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT apple_music_url
+        FROM reviews
+        WHERE album_id = ?
+    """, (album_id,))
+
+    result = cursor.fetchone()
+
+    if result and result[0]:
+        conn.close()
+        return result[0]
+
+    cursor.execute("""
+        SELECT apple_music_url
+        FROM queue
+        WHERE album_id = ?
+    """, (album_id,))
+
+    result = cursor.fetchone()
+
+    conn.close()
+
+    if result and result[0]:
+        return result[0]
+
+    return None
+
+def save_apple_music_url(album_id, apple_music_url):
+    conn = sqlite3.connect('reviews.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE reviews
+        SET apple_music_url = ?
+        WHERE album_id = ?
+    """, (apple_music_url, album_id))
+
+    cursor.execute("""
+        UPDATE queue
+        SET apple_music_url = ?
+        WHERE album_id = ?
+    """, (apple_music_url, album_id))
+
+    conn.commit()
+    conn.close()
+
 # Queue Database Functions
 
-def add_to_queue(album_id, name, artist, art, release_date, color):
+def add_to_queue(album_id, name, artist, art, release_date, color, apple_music_url):
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
     cursor.execute("""
         INSERT INTO queue
-        (album_id, name, artist, art, release_date, color)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (album_id, name, artist, art, release_date, color, apple_music_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         album_id,
         name,
         artist,
         art,
         release_date,
-        color
+        color,
+        apple_music_url
     ))
 
     conn.commit()

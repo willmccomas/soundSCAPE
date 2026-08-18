@@ -1,7 +1,7 @@
 from flask import Flask, session, render_template, request, url_for, redirect
-from spotify_api import get_album, search_albums
+from spotify_api import get_album, search_albums, get_apple_music_url
 from image_colors import get_dom_color
-from database import get_review_color, get_queue_color, get_review_years, get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
+from database import save_apple_music_url, get_saved_apple_music_url, get_review_apple_music_url, get_review_color, get_queue_color, get_review_years, get_rating_counts, format_release_date, days_ago, get_all_reviews, save_review, get_reviews, get_recent_reviews, review_exists, get_ratings_for_albums, add_to_queue, remove_from_queue, is_in_queue, get_queue, get_random_queue_album
 import sqlite3
 
 def star_rating(rating):
@@ -55,6 +55,18 @@ def album_review(album_id):
     reviews = get_reviews(album_id)
     in_queue = is_in_queue(album_id)
 
+    apple_music_url = get_saved_apple_music_url(album_id)
+
+    if apple_music_url is None:
+        apple_music_url = get_apple_music_url(
+            spotify_data["name"],
+            spotify_data["artist"]
+        )
+
+        if apple_music_url == "NOT_FOUND":
+            save_apple_music_url(album_id, "NOT_FOUND")
+            apple_music_url = None
+
     color = get_queue_color(album_id)
 
     if color is None:
@@ -65,11 +77,11 @@ def album_review(album_id):
         rating = float(request.form.get("rating"))
         review = request.form.get("review")
 
-        save_review(album_id, spotify_data["name"], spotify_data["artist"], spotify_data["art"], spotify_data["release_date"], rating, review, color)
+        save_review(album_id, spotify_data["name"], spotify_data["artist"], spotify_data["art"], spotify_data["release_date"], rating, review, color, apple_music_url)
 
         return redirect(url_for('ranking', album_id=album_id))
     
-    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, in_queue=in_queue, format_release_date=format_release_date)
+    return render_template('ranking_form.html', spotify=spotify_data, color=color, reviews=reviews, in_queue=in_queue, apple_music_url=apple_music_url, format_release_date=format_release_date)
 
 # Personal ranking page route
 @app.route('/ranking/<album_id>')
@@ -80,7 +92,19 @@ def ranking(album_id):
 
     color = reviews[0][2]
 
-    return render_template('ranking.html', spotify=spotify_data, reviews=reviews, color=color,in_queue=in_queue, format_release_date=format_release_date)
+    apple_music_url = get_saved_apple_music_url(album_id)
+
+    if apple_music_url is None:
+        apple_music_url = get_apple_music_url(
+            spotify_data["name"],
+            spotify_data["artist"]
+        )
+
+        if apple_music_url == "NOT_FOUND":
+            save_apple_music_url(album_id, "NOT_FOUND")
+            apple_music_url = None
+
+    return render_template('ranking.html', spotify=spotify_data, reviews=reviews, color=color,in_queue=in_queue, apple_music_url=apple_music_url, format_release_date=format_release_date)
 
 # Search page route
 @app.route('/search')
@@ -121,12 +145,20 @@ def toggle_queue(album_id):
 
     if is_in_queue(album_id):
         remove_from_queue(album_id)
+
     else:
         if review_exists(album_id):
             color = get_review_color(album_id)
+            apple_music_url = get_review_apple_music_url(album_id)
+
         else:
             color = get_dom_color(spotify_data["art"])
             color = f"rgb{color}"
+
+            apple_music_url = get_apple_music_url(
+                spotify_data["name"],
+                spotify_data["artist"]
+            )
 
         add_to_queue(
             album_id,
@@ -134,7 +166,8 @@ def toggle_queue(album_id):
             spotify_data["artist"],
             spotify_data["art"],
             spotify_data["release_date"],
-            color
+            color,
+            apple_music_url
         )
 
     return redirect(request.referrer or url_for('queue'))

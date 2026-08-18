@@ -58,16 +58,40 @@
                     {% endif %}
                 </a>
 
-                <!-- Link to the album on Spotify -->
-                 {% if spotify.url %}
-                    <a
-                        href="{{ spotify.url }}"
-                        target="_blank"
-                        class="spotify-button"
-                    >
-                        Open in Spotify
-                    </a>
-                {% endif %}
+                <div class="music-buttons">
+
+                    {% if apple_music_url and apple_music_url != "NOT_FOUND"%}
+                        <a
+                            href="{{ apple_music_url }}"
+                            target="_blank"
+                            class="apple-music-button"
+                            aria-label="Open in Apple Music"
+                        >
+                            <img
+                                src="{{ url_for('static', filename='images/am_icon.png') }}"
+                                alt="Apple Music"
+                                class="apple-music-logo"
+                            >
+                        </a>
+                    {% endif %}
+
+                    <!-- Link to the album on Spotify -->
+                    {% if spotify.url %}
+                        <a
+                            href="{{ spotify.url }}"
+                            target="_blank"
+                            class="spotify-button"
+                            aria-label="Open in Spotify"
+                        >
+                            <img
+                                src="{{ url_for('static', filename='images/spotify_icon.png') }}"
+                                alt="Spotify"
+                                class="spotify-logo"
+                            >
+                        </a>
+                    {% endif %}
+
+                </div>
                 
             </div>
 

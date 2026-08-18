@@ -150,7 +150,7 @@
                     <select id="year-filter" onchange="filterByYear()">
 
                         <option value="" {% if not request.args.get('year') %}selected{% endif %}>
-                            All Years
+                            All
                         </option>
 
                         {% for year in years %}

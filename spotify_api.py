@@ -1,8 +1,9 @@
-import os
+import os, re
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from pprint import pprint
+import requests
 
 load_dotenv()
 
@@ -133,3 +134,70 @@ def format_artists(artists):
         return f"{names[0]} & {names[1]}"
     else:
         return ", ".join(names[:-1]) + f" & {names[-1]}"
+
+def get_apple_music_url(album_name, artist):
+    url = "https://itunes.apple.com/search"
+
+    searches = [
+        f"{album_name} {artist}",
+        album_name
+    ]
+
+    for search_term in searches:
+        params = {
+            "term": search_term,
+            "entity": "album",
+            "limit": 10
+        }
+
+        response = requests.get(url, params=params)
+
+        if response.status_code != 200:
+            continue
+
+        results = response.json()["results"]
+
+        normalized_album = normalize_album_title(album_name)
+        requested_artist = artist.lower().strip()
+
+        matches = []
+
+        for result in results:
+            result_album = normalize_album_title(
+                result.get("collectionName", "")
+            )
+
+            result_artist = result.get("artistName", "").lower().strip()
+
+            if (
+                result_album == normalized_album
+                and result_artist == requested_artist
+            ):
+                matches.append(result)
+
+        if matches:
+            for result in matches:
+                if result.get("contentAdvisoryRating") == "Explicit":
+                    return result.get("collectionViewUrl")
+
+            return matches[0].get("collectionViewUrl")
+
+    return "NOT_FOUND"
+
+def normalize_album_title(title):
+    title = title.lower().strip()
+
+    # Remove common version labels
+    title = re.sub(
+        r'\s*\((deluxe|deluxe edition|deluxe version|original|remastered|expanded edition)\)\s*$',
+        '',
+        title
+    )
+
+    # Remove punctuation
+    title = re.sub(r'[^\w\s]', '', title)
+
+    # Collapse multiple spaces
+    title = re.sub(r'\s+', ' ', title)
+
+    return title.strip()
