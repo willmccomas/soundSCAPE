@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -7,10 +8,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-
 <body>
 
-    <!-- Navigation bar -->
+    <!-- =====================================================
+         NAVIGATION BAR
+         ===================================================== -->
+
     <nav>
 
         <!-- SoundScape logo -->
@@ -28,19 +31,31 @@
     </nav>
 
 
-    <!-- Main page content -->
+    <!-- =====================================================
+         MAIN PAGE CONTENT
+         ===================================================== -->
+
     <div class="page-container">
 
+        <!-- Queue page header -->
         <div class="queue-header">
 
             <h1>Queue</h1>
 
-            <a href="{{ url_for('random_queue') }}" class="sort-button pick-random-button">
+            <!-- Button that selects a random queued album -->
+            <a
+                href="{{ url_for('random_queue') }}"
+                class="sort-button pick-random-button"
+            >
                 Pick Random
             </a>
 
         </div>
 
+
+        <!-- =================================================
+             QUEUED ALBUMS
+             ================================================= -->
 
         {% if albums %}
 
@@ -52,7 +67,11 @@
                     <!-- Individual queued album -->
                     <div class="album-card">
 
-                        <!-- Clicking the artwork opens the album -->
+                        <!--
+                            If the album has already been reviewed,
+                            clicking it opens the completed review.
+                        -->
+
                         {% if album[0] in reviewed_album_ids %}
 
                             <a href="{{ url_for('ranking', album_id=album[0]) }}">
@@ -63,6 +82,11 @@
                             </a>
 
                         {% else %}
+
+                            <!--
+                                If the album has not been reviewed,
+                                clicking it opens the rating form.
+                            -->
 
                             <a href="{{ url_for('album_review', album_id=album[0]) }}">
                                 <img

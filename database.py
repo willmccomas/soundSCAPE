@@ -1,9 +1,18 @@
 import sqlite3
 from datetime import datetime
 
+
+# =========================================================
+# DATABASE INITIALIZATION
+# =========================================================
+
 def init_db():
+    """Create the database tables if they do not already exist."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
+
+    # Reviews table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS reviews (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,8 +26,10 @@ def init_db():
             color TEXT,
             review_date TEXT,
             apple_music_url TEXT
-            )""")
+        )
+    """)
 
+    # Queue table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS queue (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,22 +41,51 @@ def init_db():
             color TEXT,
             apple_music_url TEXT,
             added_date TEXT DEFAULT CURRENT_TIMESTAMP
-            )""")
+        )
+    """)
 
     conn.commit()
     conn.close()
 
-# Reviews Database Functions
-def save_review(album_id, name, artist, art, release_date, rating, review, color, apple_music_url):
+
+# =========================================================
+# REVIEW DATABASE FUNCTIONS
+# =========================================================
+
+def save_review(
+    album_id,
+    name,
+    artist,
+    art,
+    release_date,
+    rating,
+    review,
+    color,
+    apple_music_url
+):
+    """Save a new album review to the database."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
+
     review_date = datetime.now().isoformat()
+
     cursor.execute("""
-    INSERT INTO reviews
-    (album_id, name, artist, art, release_date, rating, review, color, review_date, apple_music_url)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """,
-    (
+        INSERT INTO reviews
+        (
+            album_id,
+            name,
+            artist,
+            art,
+            release_date,
+            rating,
+            review,
+            color,
+            review_date,
+            apple_music_url
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
         album_id,
         name,
         artist,
@@ -61,19 +101,29 @@ def save_review(album_id, name, artist, art, release_date, rating, review, color
     conn.commit()
     conn.close()
 
+
 def get_reviews(album_id):
+    """Get the review information for a specific album."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
+
     cursor.execute("""
-        SELECT rating, review, color 
-        FROM reviews 
+        SELECT rating, review, color
+        FROM reviews
         WHERE album_id = ?
     """, (album_id,))
+
     reviews = cursor.fetchall()
+
     conn.close()
+
     return reviews
 
+
 def get_all_reviews(sort, year=None):
+    """Get all reviews using the selected sorting and year filter."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -90,13 +140,14 @@ def get_all_reviews(sort, year=None):
 
     order_by = sort_options.get(sort, 'release_date DESC')
 
-    query = f"""
+    query = """
         SELECT album_id, name, artist, art, release_date, rating, review
         FROM reviews
     """
 
     params = []
 
+    # Filter reviews by release year when one is selected.
     if year:
         query += " WHERE release_date LIKE ?"
         params.append(f"{year}%")
@@ -111,7 +162,10 @@ def get_all_reviews(sort, year=None):
 
     return reviews
 
+
 def get_rating_counts(year=None):
+    """Get the number of albums at each rating level."""
+
     conn = sqlite3.connect("reviews.db")
     cursor = conn.cursor()
 
@@ -122,6 +176,7 @@ def get_rating_counts(year=None):
 
     params = []
 
+    # Filter ratings by release year when one is selected.
     if year:
         query += " WHERE release_date LIKE ?"
         params.append(f"{year}%")
@@ -139,13 +194,20 @@ def get_rating_counts(year=None):
 
     counts = {rating: count for rating, count in results}
 
-    for rating in [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]:
+    # Make sure every possible rating is represented.
+    for rating in [
+        0.5, 1.0, 1.5, 2.0, 2.5,
+        3.0, 3.5, 4.0, 4.5, 5.0
+    ]:
         if rating not in counts:
             counts[rating] = 0
 
     return dict(sorted(counts.items()))
 
+
 def get_review_years():
+    """Get all unique album release years from reviewed albums."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -162,19 +224,10 @@ def get_review_years():
 
     return years
 
-def has_reviews(album_id):
-    conn = sqlite3.connect('reviews.db')
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id 
-        FROM reviews 
-        WHERE album_id = ?
-    """, (album_id,))
-    review = cursor.fetchone()
-    conn.close()
-    return review is not None
 
 def review_exists(album_id):
+    """Check whether an album has an existing review."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -189,7 +242,10 @@ def review_exists(album_id):
 
     return exists
 
+
 def get_ratings_for_albums(album_ids):
+    """Get saved ratings for a list of album IDs."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -206,27 +262,47 @@ def get_ratings_for_albums(album_ids):
     """, album_ids)
 
     ratings = cursor.fetchall()
+
     conn.close()
 
     return dict(ratings)
 
+
 def get_recent_reviews():
+    """Get the five most recently reviewed albums."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT album_id, name, artist, art, release_date, rating, review, review_date
+        SELECT
+            album_id,
+            name,
+            artist,
+            art,
+            release_date,
+            rating,
+            review,
+            review_date
         FROM reviews
         ORDER BY review_date DESC
         LIMIT 5
     """)
 
     reviews = cursor.fetchall()
+
     conn.close()
 
     return reviews
 
+
+# =========================================================
+# REVIEW DISPLAY HELPERS
+# =========================================================
+
 def days_ago(review_date):
+    """Return a human-readable description of when a review was made."""
+
     review_date = datetime.fromisoformat(review_date).date()
     today = datetime.today().date()
 
@@ -234,12 +310,17 @@ def days_ago(review_date):
 
     if days == 0:
         return "Rated today"
+
     elif days == 1:
         return "Rated yesterday"
+
     else:
         return f"Rated {days} days ago"
 
+
 def format_release_date(release_date):
+    """Convert an album release date into a readable format."""
+
     if len(release_date) == 4:
         return release_date
 
@@ -249,18 +330,29 @@ def format_release_date(release_date):
 
     if 11 <= day <= 13:
         suffix = "th"
+
     elif day % 10 == 1:
         suffix = "st"
+
     elif day % 10 == 2:
         suffix = "nd"
+
     elif day % 10 == 3:
         suffix = "rd"
+
     else:
         suffix = "th"
 
     return f"{date.strftime('%B')} {day}{suffix}, {date.year}"
 
+
+# =========================================================
+# REVIEW INFORMATION
+# =========================================================
+
 def get_review_color(album_id):
+    """Get the saved color for a reviewed album."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -276,7 +368,10 @@ def get_review_color(album_id):
 
     return result[0] if result else None
 
+
 def get_review_apple_music_url(album_id):
+    """Get the Apple Music URL saved with a review."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -295,10 +390,17 @@ def get_review_apple_music_url(album_id):
 
     return None
 
+
 def get_saved_apple_music_url(album_id):
+    """
+    Get a saved Apple Music URL from either the reviews
+    or queue table.
+    """
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
+    # Check reviewed albums first.
     cursor.execute("""
         SELECT apple_music_url
         FROM reviews
@@ -311,6 +413,7 @@ def get_saved_apple_music_url(album_id):
         conn.close()
         return result[0]
 
+    # If not reviewed, check the queue.
     cursor.execute("""
         SELECT apple_music_url
         FROM queue
@@ -326,16 +429,24 @@ def get_saved_apple_music_url(album_id):
 
     return None
 
+
 def save_apple_music_url(album_id, apple_music_url):
+    """
+    Save an Apple Music URL to both the reviews and
+    queue tables when the album exists there.
+    """
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
+    # Update the reviewed album if it exists.
     cursor.execute("""
         UPDATE reviews
         SET apple_music_url = ?
         WHERE album_id = ?
     """, (apple_music_url, album_id))
 
+    # Update the queued album if it exists.
     cursor.execute("""
         UPDATE queue
         SET apple_music_url = ?
@@ -345,15 +456,36 @@ def save_apple_music_url(album_id, apple_music_url):
     conn.commit()
     conn.close()
 
-# Queue Database Functions
 
-def add_to_queue(album_id, name, artist, art, release_date, color, apple_music_url):
+# =========================================================
+# QUEUE DATABASE FUNCTIONS
+# =========================================================
+
+def add_to_queue(
+    album_id,
+    name,
+    artist,
+    art,
+    release_date,
+    color,
+    apple_music_url
+):
+    """Add an album to the queue."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
     cursor.execute("""
         INSERT INTO queue
-        (album_id, name, artist, art, release_date, color, apple_music_url)
+        (
+            album_id,
+            name,
+            artist,
+            art,
+            release_date,
+            color,
+            apple_music_url
+        )
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         album_id,
@@ -368,7 +500,10 @@ def add_to_queue(album_id, name, artist, art, release_date, color, apple_music_u
     conn.commit()
     conn.close()
 
+
 def remove_from_queue(album_id):
+    """Remove an album from the queue."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -380,7 +515,10 @@ def remove_from_queue(album_id):
     conn.commit()
     conn.close()
 
+
 def is_in_queue(album_id):
+    """Check whether an album is currently in the queue."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -396,7 +534,10 @@ def is_in_queue(album_id):
 
     return result is not None
 
+
 def get_queue():
+    """Get all queued albums, newest additions first."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -412,7 +553,10 @@ def get_queue():
 
     return albums
 
+
 def get_random_queue_album():
+    """Return one randomly selected album from the queue."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -429,7 +573,10 @@ def get_random_queue_album():
 
     return album
 
+
 def get_queue_color(album_id):
+    """Get the saved color for a queued album."""
+
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
 
@@ -447,6 +594,11 @@ def get_queue_color(album_id):
         return result[0]
 
     return None
+
+
+# =========================================================
+# DATABASE INITIALIZATION
+# =========================================================
 
 if __name__ == "__main__":
     init_db()

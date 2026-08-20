@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -7,10 +8,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-
 <body>
 
-    <!-- Navigation bar -->
+    <!-- =====================================================
+         NAVIGATION BAR
+         ===================================================== -->
+
     <nav>
 
         <!-- SoundScape logo -->
@@ -28,9 +31,13 @@
     </nav>
 
 
-    <!-- Main page content -->
+    <!-- =====================================================
+         MAIN PAGE CONTENT
+         ===================================================== -->
+
     <div class="page-container">
 
+        <!-- Page heading -->
         <div class="home-header">
 
             <h1>Home</h1>
@@ -38,15 +45,24 @@
         </div>
 
 
+        <!-- =================================================
+             RECENTLY RATED ALBUMS
+             Displays the user's most recently reviewed albums.
+             ================================================= -->
+
         <div class="recent-ratings">
 
             <h2>Recently Rated</h2>
 
             {% for album in recent_reviews %}
 
-                <div class="album-search-card" style="background-image: url('{{ album[3] }}');">
+                <!-- Individual album card -->
+                <div
+                    class="album-search-card"
+                    style="background-image: url('{{ album[3] }}');"
+                >
 
-                    <!-- Album artwork -->
+                    <!-- Album artwork links to the album's review -->
                     <a href="{{ url_for('ranking', album_id=album[0]) }}">
                         <img
                             src="{{ album[3] }}"
@@ -55,21 +71,27 @@
                         >
                     </a>
 
+
                     <!-- Album information -->
                     <div class="search-album-info">
 
+                        <!-- Album title -->
                         <h2>{{ album[1] }}</h2>
 
+                        <!-- Artist -->
                         <p>{{ album[2] }}</p>
 
+                        <!-- Release date -->
                         <p>
                             Release Date: {{ format_release_date(album[4]) }}
                         </p>
 
+                        <!-- User's rating -->
                         <div class="stars">
                             {{ star_rating(album[5]) }}
                         </div>
 
+                        <!-- How long ago the album was reviewed -->
                         <h2>{{ days_ago(album[7]) }}</h2>
 
                     </div>

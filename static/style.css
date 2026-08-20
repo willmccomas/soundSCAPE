@@ -4,7 +4,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -23,6 +22,7 @@ body {
 }
 
 /* Album-specific gradient background */
+
 body:has(.review-page) {
     background: linear-gradient(
         135deg,
@@ -319,6 +319,7 @@ nav a:hover {
     display: block;
 }
 
+
 /* Sort button and dropdown container */
 
 .sort-container {
@@ -462,6 +463,7 @@ nav a:hover {
 .rating-bar-container {
     flex: 1;
     height: 100%;
+
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -471,8 +473,10 @@ nav a:hover {
 .rating-bar {
     width: 98%;
     height: var(--bar-height);
+
     background: #555;
     border-radius: 0;
+
     cursor: pointer;
 }
 
@@ -481,7 +485,7 @@ nav a:hover {
 }
 
 .rating-bar.selected {
-    background: linear-gradient(180deg, #6EE7FF, #A855F7)
+    background: linear-gradient(180deg, #6EE7FF, #A855F7);
 }
 
 .rating-bar.dimmed {
@@ -499,6 +503,7 @@ nav a:hover {
     margin-top: 6px;
     font-size: 12px;
 }
+
 
 /* =========================================================
    ALBUM GRID
@@ -717,6 +722,7 @@ nav a:hover {
     position: relative;
     overflow: hidden;
 }
+
 
 /* Stars for search results */
 
@@ -960,6 +966,7 @@ nav a:hover {
     justify-self: end;
 }
 
+
 /* =========================================================
    QUEUE BUTTON
    ========================================================= */
@@ -991,7 +998,10 @@ nav a:hover {
     transform: scale(1.05);
 }
 
-/* MUSIC BUTTONS */
+
+/* =========================================================
+   MUSIC BUTTONS
+   ========================================================= */
 
 .music-buttons {
     display: flex;
@@ -999,6 +1009,7 @@ nav a:hover {
     align-items: center;
     margin-top: 15px;
 }
+
 
 /* =========================================================
    SPOTIFY BUTTON
@@ -1031,8 +1042,10 @@ nav a:hover {
     height: 24px;
 }
 
-/* Apple music button*/
 
+/* =========================================================
+   APPLE MUSIC BUTTON
+   ========================================================= */
 
 .apple-music-button {
     display: inline-flex;
@@ -1059,6 +1072,7 @@ nav a:hover {
     height: 24px;
     object-fit: contain;
 }
+
 
 /* =========================================================
    EDIT REVIEW BUTTON
@@ -1182,7 +1196,6 @@ nav a:hover {
         gap: 40px;
     }
 
-
     /* Make both sections fit smaller screens. */
 
     .album-info,
@@ -1190,7 +1203,6 @@ nav a:hover {
         width: 100%;
         max-width: 400px;
     }
-
 
     /* Scale the large album artwork down. */
 

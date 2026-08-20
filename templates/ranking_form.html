@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -10,7 +11,10 @@
 
 <body style="--album-color: {{ color }};">
 
-    <!-- Navigation bar -->
+    <!-- =====================================================
+         NAVIGATION BAR
+         ===================================================== -->
+
     <nav>
 
         <!-- SoundScape logo -->
@@ -28,12 +32,18 @@
     </nav>
 
 
-    <!-- Main ranking page -->
+    <!-- =====================================================
+         MAIN RANKING PAGE
+         ===================================================== -->
+
     <div class="page-container">
 
         <div class="review-page">
 
-            <!-- LEFT SIDE: ALBUM INFORMATION -->
+            <!-- =================================================
+                 LEFT SIDE: ALBUM INFORMATION
+                 ================================================= -->
+
             <div class="album-info">
 
                 <!-- Album artwork -->
@@ -47,11 +57,15 @@
 
                 <h2>{{ spotify.artist }}</h2>
 
-                <!-- Album information -->
-                <p>Released: {{ format_release_date(spotify.release_date) }}</p>
+                <!-- Album release date -->
+                <p>
+                    Released: {{ format_release_date(spotify.release_date) }}
+                </p>
 
+
+                <!-- Album action buttons -->
                 <div class="album-info-actions">
-                
+
                     <!-- Add/remove to/from queue button -->
                     <a
                         href="{{ url_for('toggle_queue', album_id=spotify.id) }}"
@@ -64,9 +78,13 @@
                         {% endif %}
                     </a>
 
+
+                    <!-- Music service buttons -->
                     <div class="music-buttons">
 
-                        {% if apple_music_url and apple_music_url != "NOT_FOUND"%}
+                        <!-- Apple Music -->
+                        {% if apple_music_url and apple_music_url != "NOT_FOUND" %}
+
                             <a
                                 href="{{ apple_music_url }}"
                                 target="_blank"
@@ -79,10 +97,13 @@
                                     class="apple-music-logo"
                                 >
                             </a>
+
                         {% endif %}
 
-                        <!-- Link to the album on Spotify -->
+
+                        <!-- Spotify -->
                         {% if spotify.url %}
+
                             <a
                                 href="{{ spotify.url }}"
                                 target="_blank"
@@ -95,6 +116,7 @@
                                     class="spotify-logo"
                                 >
                             </a>
+
                         {% endif %}
 
                     </div>
@@ -104,7 +126,10 @@
             </div>
 
 
-            <!-- RIGHT SIDE: RATING FORM -->
+            <!-- =================================================
+                 RIGHT SIDE: RATING FORM
+                 ================================================= -->
+
             <div class="review-card">
 
                 <h2>Rate This Album</h2>
@@ -126,6 +151,7 @@
                             {% endfor %}
 
                         </div>
+
 
                         <!-- Hidden field that stores the selected rating -->
                         <input
@@ -166,42 +192,73 @@
 
     </div>
 
+
+    <!-- =====================================================
+         QUEUE BUTTON JAVASCRIPT
+         Prevents the button from being clicked repeatedly.
+         ===================================================== -->
+
     <script>
-        const queueButton = document.querySelector(".queue-button");
+
+        const queueButton =
+            document.querySelector(".queue-button");
 
         if (queueButton) {
+
             queueButton.addEventListener("click", function () {
+
                 queueButton.style.pointerEvents = "none";
                 queueButton.style.opacity = "0.6";
+
             });
+
         }
+
     </script>
 
-    <!-- Star rating JavaScript -->
+
+    <!-- =====================================================
+         STAR RATING JAVASCRIPT
+         Handles full and half-star ratings.
+         ===================================================== -->
+
     <script>
-        const stars = document.querySelectorAll(".rating-star");
-        const ratingInput = document.getElementById("rating");
 
-        let currentRating = parseFloat(ratingInput.value) || 0;
+        const stars =
+            document.querySelectorAll(".rating-star");
+
+        const ratingInput =
+            document.getElementById("rating");
+
+        let currentRating =
+            parseFloat(ratingInput.value) || 0;
 
 
-        // Handle star clicks
+        // Handle star clicks.
         stars.forEach(star => {
 
             star.addEventListener("click", () => {
 
-                const rating = parseInt(star.dataset.rating);
+                const rating =
+                    parseInt(star.dataset.rating);
+
 
                 // Clicking the same star twice changes it to a half-star.
                 if (currentRating === rating) {
+
                     currentRating = rating - 0.5;
+
                 } else {
+
                     currentRating = rating;
+
                 }
+
 
                 ratingInput.value = currentRating;
 
                 updateStars();
+
             });
 
         });
@@ -212,14 +269,18 @@
 
             stars.forEach(star => {
 
-                const rating = parseInt(star.dataset.rating);
+                const rating =
+                    parseInt(star.dataset.rating);
 
                 star.classList.remove("active");
                 star.classList.remove("half");
 
+
                 // Fill complete stars.
                 if (rating <= Math.floor(currentRating)) {
+
                     star.classList.add("active");
+
                 }
 
             });
@@ -228,9 +289,11 @@
             // Display a half-filled star when necessary.
             if (currentRating % 1 !== 0) {
 
-                const halfStar = stars[Math.ceil(currentRating) - 1];
+                const halfStar =
+                    stars[Math.ceil(currentRating) - 1];
 
                 halfStar.classList.add("half");
+
             }
 
         }
@@ -238,6 +301,7 @@
 
         // Display the current rating when the page loads.
         updateStars();
+
     </script>
 
 </body>

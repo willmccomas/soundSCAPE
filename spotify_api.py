@@ -1,13 +1,32 @@
-import os, re
-from dotenv import load_dotenv
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-from pprint import pprint
+import os
+import re
+
 import requests
+import spotipy
+
+from dotenv import load_dotenv
+from spotipy.oauth2 import SpotifyClientCredentials
+
+
+# =========================================================
+# ENVIRONMENT / SPOTIFY SETUP
+# =========================================================
 
 load_dotenv()
 
-# Dictionary for albums not on spotify
+
+spotify = spotipy.Spotify(
+    auth_manager=SpotifyClientCredentials(
+        client_id=os.getenv("SPOTIFY_CLIENT_ID"),
+        client_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
+    )
+)
+
+
+# =========================================================
+# CUSTOM ALBUMS
+# Albums that are not available through Spotify.
+# =========================================================
 
 CUSTOM_ALBUMS = {
     "owl_pharaoh": {
@@ -51,26 +70,28 @@ CUSTOM_ALBUMS = {
     }
 }
 
-spotify = spotipy.Spotify(
-    auth_manager = SpotifyClientCredentials(
-        client_id = os.getenv("SPOTIFY_CLIENT_ID"),
-        client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
-    )
-)
+
+# =========================================================
+# SPOTIFY FUNCTIONS
+# =========================================================
 
 def get_album(album_id):
+    """Get album information from Spotify or the custom album list."""
+
+    # Check custom albums first.
     if album_id in CUSTOM_ALBUMS:
         return CUSTOM_ALBUMS[album_id]
 
+    # Get album information from Spotify.
     album = spotify.album(album_id)
 
-    album_name = album['name']
+    album_name = album["name"]
     album_artist = format_artists(album["artists"])
-    album_release_date = album['release_date']
-    album_total_tracks = album['total_tracks']
-    album_url = album['external_urls']['spotify']
-    album_art = album['images'][0]['url']
-    album_id = album['id']
+    album_release_date = album["release_date"]
+    album_total_tracks = album["total_tracks"]
+    album_url = album["external_urls"]["spotify"]
+    album_art = album["images"][0]["url"]
+    album_id = album["id"]
 
     return {
         "name": album_name,
@@ -82,29 +103,43 @@ def get_album(album_id):
         "id": album_id
     }
 
+
 def search_albums(query):
-    results = spotify.search(q=query, type="album", limit=10)
-    album_results = results['albums']['items']
+    """Search Spotify for albums and include matching custom albums."""
+
+    results = spotify.search(
+        q=query,
+        type="album",
+        limit=10
+    )
+
+    album_results = results["albums"]["items"]
+
     seen = set()
     albums = []
 
     for album in album_results:
-        album_name = album['name']
+
+        album_name = album["name"]
         album_artist = format_artists(album["artists"])
 
-        # Stops duplicate albums (ex. clean and explicit versions)
-        key = (album_name.lower(), album_artist.lower())
+        # Stop duplicate albums, such as clean and explicit versions.
+        key = (
+            album_name.lower(),
+            album_artist.lower()
+        )
 
         if key in seen:
             continue
 
         seen.add(key)
 
-        album_release_date = album['release_date']
-        album_total_tracks = album['total_tracks']
-        album_url = album['external_urls']['spotify']
-        album_art = album['images'][0]['url']
-        album_id = album['id']
+        album_release_date = album["release_date"]
+        album_total_tracks = album["total_tracks"]
+        album_url = album["external_urls"]["spotify"]
+        album_art = album["images"][0]["url"]
+        album_id = album["id"]
+
         albums.append({
             "name": album_name,
             "artist": album_artist,
@@ -117,7 +152,9 @@ def search_albums(query):
 
         query_lower = query.lower()
 
+    # Add matching custom albums to the search results.
     for album in CUSTOM_ALBUMS.values():
+
         if (
             query_lower in album["name"].lower()
             or query_lower in album["artist"].lower()
@@ -126,16 +163,29 @@ def search_albums(query):
 
     return albums
 
+
 def format_artists(artists):
+    """Format a list of Spotify artists into a readable string."""
+
     names = [artist["name"] for artist in artists]
+
     if len(names) == 1:
         return names[0]
+
     elif len(names) == 2:
         return f"{names[0]} & {names[1]}"
+
     else:
         return ", ".join(names[:-1]) + f" & {names[-1]}"
 
+
+# =========================================================
+# APPLE MUSIC FUNCTIONS
+# =========================================================
+
 def get_apple_music_url(album_name, artist):
+    """Find the Apple Music URL for an album."""
+
     url = "https://itunes.apple.com/search"
 
     searches = [
@@ -144,6 +194,7 @@ def get_apple_music_url(album_name, artist):
     ]
 
     for search_term in searches:
+
         params = {
             "term": search_term,
             "entity": "album",
@@ -163,11 +214,15 @@ def get_apple_music_url(album_name, artist):
         matches = []
 
         for result in results:
+
             result_album = normalize_album_title(
                 result.get("collectionName", "")
             )
 
-            result_artist = result.get("artistName", "").lower().strip()
+            result_artist = result.get(
+                "artistName",
+                ""
+            ).lower().strip()
 
             if (
                 result_album == normalized_album
@@ -176,28 +231,35 @@ def get_apple_music_url(album_name, artist):
                 matches.append(result)
 
         if matches:
+
+            # Prefer the explicit version when available.
             for result in matches:
+
                 if result.get("contentAdvisoryRating") == "Explicit":
                     return result.get("collectionViewUrl")
 
+            # Fall back to the first matching result.
             return matches[0].get("collectionViewUrl")
 
     return "NOT_FOUND"
 
+
 def normalize_album_title(title):
+    """Normalize album titles to make Apple Music matching easier."""
+
     title = title.lower().strip()
 
-    # Remove common version labels
+    # Remove common version labels.
     title = re.sub(
         r'\s*\((deluxe|deluxe edition|deluxe version|original|remastered|expanded edition)\)\s*$',
         '',
         title
     )
 
-    # Remove punctuation
+    # Remove punctuation.
     title = re.sub(r'[^\w\s]', '', title)
 
-    # Collapse multiple spaces
+    # Collapse multiple spaces.
     title = re.sub(r'\s+', ' ', title)
 
     return title.strip()

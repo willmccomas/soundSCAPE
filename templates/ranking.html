@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -10,24 +11,37 @@
 
 <body style="--album-color: {{ color }};">
 
-    <!-- Navigation bar -->
+    <!-- =====================================================
+         NAVIGATION BAR
+         ===================================================== -->
+
     <nav>
+
+        <!-- SoundScape logo -->
         <a href="/" class="logo">
             <span class="sound">sound</span><span class="scape">SCAPE</span>
         </a>
 
+        <!-- Main navigation links -->
         <div class="nav-links">
             <a href="/all_rankings">Ratings</a>
             <a href="/queue">Queue</a>
             <a href="/search">Search</a>
         </div>
+
     </nav>
 
 
-    <!-- Main review page -->
+    <!-- =====================================================
+         MAIN REVIEW PAGE
+         ===================================================== -->
+
     <div class="review-page">
 
-        <!-- LEFT SIDE: ALBUM INFORMATION -->
+        <!-- =================================================
+             LEFT SIDE: ALBUM INFORMATION
+             ================================================= -->
+
         <div class="album-info">
 
             <!-- Album artwork -->
@@ -42,10 +56,14 @@
             <h2>{{ spotify.artist }}</h2>
 
             <!-- Album release information -->
-            <p>Released: {{ format_release_date(spotify.release_date) }}</p>
-            
+            <p>
+                Released: {{ format_release_date(spotify.release_date) }}
+            </p>
+
+
+            <!-- Album action buttons -->
             <div class="album-info-actions">
-                
+
                 <!-- Add/remove to/from queue button -->
                 <a
                     href="{{ url_for('toggle_queue', album_id=spotify.id) }}"
@@ -58,9 +76,13 @@
                     {% endif %}
                 </a>
 
+
+                <!-- Music service buttons -->
                 <div class="music-buttons">
 
-                    {% if apple_music_url and apple_music_url != "NOT_FOUND"%}
+                    <!-- Apple Music -->
+                    {% if apple_music_url and apple_music_url != "NOT_FOUND" %}
+
                         <a
                             href="{{ apple_music_url }}"
                             target="_blank"
@@ -73,10 +95,13 @@
                                 class="apple-music-logo"
                             >
                         </a>
+
                     {% endif %}
 
-                    <!-- Link to the album on Spotify -->
+
+                    <!-- Spotify -->
                     {% if spotify.url %}
+
                         <a
                             href="{{ spotify.url }}"
                             target="_blank"
@@ -89,20 +114,25 @@
                                 class="spotify-logo"
                             >
                         </a>
+
                     {% endif %}
 
                 </div>
-                
+
             </div>
 
         </div>
 
 
-        <!-- RIGHT SIDE: USER REVIEW -->
+        <!-- =================================================
+             RIGHT SIDE: USER REVIEW
+             ================================================= -->
+
         <div class="user-review">
 
             <!-- Review heading -->
             <h2>Your Review:</h2>
+
 
             <!-- User's star rating -->
             <div class="review-stars">
@@ -150,15 +180,28 @@
 
     </div>
 
+
+    <!-- =====================================================
+         QUEUE BUTTON JAVASCRIPT
+         Prevents the button from being clicked repeatedly.
+         ===================================================== -->
+
     <script>
-        const queueButton = document.querySelector(".queue-button");
+
+        const queueButton =
+            document.querySelector(".queue-button");
 
         if (queueButton) {
+
             queueButton.addEventListener("click", function () {
+
                 queueButton.style.pointerEvents = "none";
                 queueButton.style.opacity = "0.6";
+
             });
+
         }
+
     </script>
 
 </body>

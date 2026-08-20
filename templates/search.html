@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -10,7 +11,10 @@
 
 <body>
 
-    <!-- Navigation bar -->
+    <!-- =========================================================
+         NAVIGATION BAR
+         ========================================================= -->
+
     <nav>
 
         <!-- SoundScape logo -->
@@ -28,14 +32,25 @@
     </nav>
 
 
-    <!-- Main search page -->
+    <!-- =========================================================
+         MAIN SEARCH PAGE
+         ========================================================= -->
+
     <div class="page-container">
 
+        <!-- Page heading -->
         <h1 class="search-title">Search for an Album</h1>
 
 
-        <!-- Search bar -->
-        <form action="/search" method="GET" class="album-search-form">
+        <!-- =====================================================
+             SEARCH FORM
+             ===================================================== -->
+
+        <form
+            action="/search"
+            method="GET"
+            class="album-search-form"
+        >
 
             <input
                 type="text"
@@ -52,9 +67,13 @@
         </form>
 
 
-        <!-- Search results -->
+        <!-- =====================================================
+             SEARCH RESULTS
+             ===================================================== -->
+
         {% if query %}
 
+            <!-- Search results heading -->
             <h2 class="search-results-heading">
                 Results for "{{ query }}"
             </h2>
@@ -62,9 +81,9 @@
 
             {% if albums %}
 
+                <!-- Individual album search results -->
                 {% for album in albums %}
 
-                    <!-- Individual album search result -->
                     <a
                         href="/album/{{ album.id }}"
                         class="album-search-card"
@@ -89,6 +108,8 @@
                                 Release Date: {{ format_release_date(album.release_date) }}
                             </p>
 
+
+                            <!-- Display the user's existing rating -->
                             {% if album.id in ratings %}
 
                                 <h2 class="stars">
@@ -106,7 +127,7 @@
 
             {% else %}
 
-                <!-- No results message -->
+                <!-- No search results message -->
                 <p class="no-search-results">
                     No albums found. Try another search.
                 </p>
