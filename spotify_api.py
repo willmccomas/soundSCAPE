@@ -67,7 +67,17 @@ CUSTOM_ALBUMS = {
         "url": "",
         "art": "/static/images/2_much_music.jpeg",
         "id": "2_much_music"
-    }
+    },
+
+    "lost_files_4": {
+            "name": "lost files 4",
+            "artist": "Ken Carson",
+            "release_date": "2023-01-03",
+            "total_tracks": 8,
+            "url": "",
+            "art": "/static/images/lost_files_4.JPG",
+            "id": "lost_files_4"
+        }
 }
 
 

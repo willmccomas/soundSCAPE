@@ -95,6 +95,10 @@ def all_rankings():
 
     reviews = get_all_reviews(sort, year)
     rating_counts = get_rating_counts(year)
+
+    # Scale all bars relative to the highest count.
+    max_rating_count = max(rating_counts.values()) if rating_counts else 0
+
     years = get_review_years()
 
     return render_template(
@@ -102,6 +106,7 @@ def all_rankings():
         albums=reviews,
         current_sort=sort,
         rating_counts=rating_counts,
+        max_rating_count=max_rating_count,
         years=years
     )
 

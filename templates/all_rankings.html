@@ -200,7 +200,7 @@
                         class="rating-bar"
                         data-rating="{{ rating }}"
                         data-count="{{ count }}"
-                        style="--bar-height: {{ count * 3.5 }}px;"
+                        style="--bar-height: {{ (count / max_rating_count * 175) if max_rating_count else 0 }}px;"
                         onclick="filter_by_rating(this)"
                     ></div>
 
@@ -401,7 +401,10 @@
             countLabel.className = "rating-count";
             countLabel.textContent = count;
 
-            bar.parentElement.insertBefore(countLabel, bar);
+            // Position the count directly above the bar.
+            countLabel.style.bottom = `${bar.offsetHeight + 25}px`;
+
+            bar.parentElement.appendChild(countLabel);
 
 
             // Filter albums
