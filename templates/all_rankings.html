@@ -66,7 +66,7 @@
 
                         <!-- Release date — newest first -->
                         <a
-                            href="{{ url_for('all_rankings', sort='release_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='release_desc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'release_desc' %}selected{% endif %}"
                         >
                             Release Date: Newest
@@ -74,7 +74,7 @@
 
                         <!-- Release date — oldest first -->
                         <a
-                            href="{{ url_for('all_rankings', sort='release_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='release_asc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'release_asc' %}selected{% endif %}"
                         >
                             Release Date: Oldest
@@ -82,7 +82,7 @@
 
                         <!-- Highest rated -->
                         <a
-                            href="{{ url_for('all_rankings', sort='rating_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='rating_desc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'rating_desc' %}selected{% endif %}"
                         >
                             Highest Rated
@@ -90,7 +90,7 @@
 
                         <!-- Lowest rated -->
                         <a
-                            href="{{ url_for('all_rankings', sort='rating_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='rating_asc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'rating_asc' %}selected{% endif %}"
                         >
                             Lowest Rated
@@ -98,7 +98,7 @@
 
                         <!-- Newest reviewed -->
                         <a
-                            href="{{ url_for('all_rankings', sort='review_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='review_desc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'review_desc' %}selected{% endif %}"
                         >
                             Review Date: Newest
@@ -106,7 +106,7 @@
 
                         <!-- Oldest reviewed -->
                         <a
-                            href="{{ url_for('all_rankings', sort='review_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='review_asc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'review_asc' %}selected{% endif %}"
                         >
                             Review Date: Oldest
@@ -114,7 +114,7 @@
 
                         <!-- Album name A-Z -->
                         <a
-                            href="{{ url_for('all_rankings', sort='name_asc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='name_asc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'name_asc' %}selected{% endif %}"
                         >
                             Album A–Z
@@ -122,7 +122,7 @@
 
                         <!-- Album name Z-A -->
                         <a
-                            href="{{ url_for('all_rankings', sort='name_desc', rating=request.args.get('rating'), year=request.args.get('year')) }}"
+                            href="{{ url_for('all_rankings', sort='name_desc', rating=request.args.get('rating'), year=request.args.get('year'), artist=request.args.get('artist')) }}"
                             class="{% if current_sort == 'name_desc' %}selected{% endif %}"
                         >
                             Album Z–A
@@ -153,7 +153,6 @@
 
                         <select
                             id="year-filter"
-                            onchange="filterByYear()"
                         >
 
                             <option
@@ -175,6 +174,22 @@
                             {% endfor %}
 
                         </select>
+
+                        <label for="artist-filter">Artist</label>
+
+                        <input
+                            type="text"
+                            id="artist-filter"
+                            placeholder="Artist name"
+                            value="{{ request.args.get('artist', '') }}"
+                        >
+
+                        <button
+                            type="button"
+                            onclick="applyFilters()"
+                        >
+                            Apply
+                        </button>
 
                     </div>
 
@@ -274,8 +289,9 @@
             filterMenu.classList.toggle("show");
         }
 
-        function filterByYear() {
+        function applyFilters() {
             const year = document.getElementById("year-filter").value;
+            const artist = document.getElementById("artist-filter").value.trim();
 
             const url = new URL(window.location.href);
 
@@ -285,6 +301,13 @@
                 url.searchParams.delete("year");
             }
 
+            if (artist) {
+                url.searchParams.set("artist", artist);
+            } else {
+                url.searchParams.delete("artist");
+            }
+
+            // Applying a new filter removes the rating filter.
             url.searchParams.delete("rating");
 
             window.location.href = url.toString();

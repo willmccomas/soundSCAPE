@@ -121,8 +121,8 @@ def get_reviews(album_id):
     return reviews
 
 
-def get_all_reviews(sort, year=None):
-    """Get all reviews using the selected sorting and year filter."""
+def get_all_reviews(sort, year=None, artist=None):
+    """Get all reviews using the selected sorting, year, and artist filters."""
 
     conn = sqlite3.connect('reviews.db')
     cursor = conn.cursor()
@@ -145,12 +145,22 @@ def get_all_reviews(sort, year=None):
         FROM reviews
     """
 
+    conditions = []
     params = []
 
     # Filter reviews by release year when one is selected.
     if year:
-        query += " WHERE release_date LIKE ?"
+        conditions.append("release_date LIKE ?")
         params.append(f"{year}%")
+
+    # Filter reviews by artist when one is entered.
+    if artist:
+        conditions.append("LOWER(artist) LIKE LOWER(?)")
+        params.append(f"%{artist}%")
+
+    # Add all active filters to the query.
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
 
     query += f" ORDER BY {order_by}"
 
@@ -163,8 +173,8 @@ def get_all_reviews(sort, year=None):
     return reviews
 
 
-def get_rating_counts(year=None):
-    """Get the number of albums at each rating level."""
+def get_rating_counts(year=None, artist=None):
+    """Get the number of albums at each rating level using the selected filters."""
 
     conn = sqlite3.connect("reviews.db")
     cursor = conn.cursor()
@@ -174,12 +184,22 @@ def get_rating_counts(year=None):
         FROM reviews
     """
 
+    conditions = []
     params = []
 
     # Filter ratings by release year when one is selected.
     if year:
-        query += " WHERE release_date LIKE ?"
+        conditions.append("release_date LIKE ?")
         params.append(f"{year}%")
+
+    # Filter ratings by artist when one is entered.
+    if artist:
+        conditions.append("LOWER(artist) LIKE LOWER(?)")
+        params.append(f"%{artist}%")
+
+    # Add all active filters to the query.
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
 
     query += """
         GROUP BY rating

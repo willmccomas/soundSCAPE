@@ -316,7 +316,15 @@ nav a:hover {
 }
 
 .filter-menu.show {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+#artist-filter {
+    width: 160px;
+    box-sizing: border-box;
 }
 
 

@@ -86,6 +86,7 @@ def home():
 def all_rankings():
     sort = request.args.get('sort')
     year = request.args.get('year')
+    artist = request.args.get('artist')
 
     # Remember the selected sorting option between page visits.
     if sort:
@@ -93,8 +94,8 @@ def all_rankings():
     else:
         sort = session.get('sort', 'release_desc')
 
-    reviews = get_all_reviews(sort, year)
-    rating_counts = get_rating_counts(year)
+    reviews = get_all_reviews(sort, year, artist)
+    rating_counts = get_rating_counts(year, artist)
 
     # Scale all bars relative to the highest count.
     max_rating_count = max(rating_counts.values()) if rating_counts else 0
